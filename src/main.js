@@ -3,22 +3,16 @@ import './style.css'
 // ── FREE TRACKS (Free Music Archive - CC licensed) ──────
 const defaultTracks = [
   {
-    name: 'Chill Lofi Beat',
-    artist: 'Muciojad',
-    url: 'https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/Muciojad/Music_For_Coding/Muciojad_-_01_-_Chill.mp3',
-    source: 'FMA'
+    name: 'Song Name',
+    artist: 'Placeholder',
+    url: '/song1.mp3',
+    source: 'LOCAL'
   },
   {
-    name: 'Acoustic Morning',
-    artist: 'Kai Engel',
-    url: 'https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Kai_Engel/Satin/Kai_Engel_-_04_-_Interlude.mp3',
-    source: 'FMA'
-  },
-  {
-    name: 'Lo-Fi Study',
-    artist: 'Ketsa',
-    url: 'https://files.freemusicarchive.org/storage-freemusicarchive-org/music/WFMU/Ketsa/Raising_Flux/Ketsa_-_05_-_Action.mp3',
-    source: 'FMA'
+    name: 'Song 2',
+    artist: 'Artist',
+    url: '/song2.mp3',
+    source: 'LOCAL'
   }
 ];
 
