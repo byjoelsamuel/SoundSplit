@@ -87,10 +87,20 @@ namespace SoundSplit.Core
                     return;
                 }
 
-                var obj = Activate(build >= 21390 ? typeof(IAudioPolicyConfigFactory21H2).GUID
-                                                  : typeof(IAudioPolicyConfigFactoryDownlevel).GUID);
-                if (build >= 21390) _new = (IAudioPolicyConfigFactory21H2)obj;
-                else _old = (IAudioPolicyConfigFactoryDownlevel)obj;
+                // Windows changed the interface ID over the years, and which build got which ID
+                // isn't documented. So ask for both and keep whichever one Windows hands back.
+                Exception? last = null;
+                try { _new = (IAudioPolicyConfigFactory21H2)Activate(typeof(IAudioPolicyConfigFactory21H2).GUID); }
+                catch (Exception ex) { last = ex; }
+
+                if (_new == null)
+                {
+                    try { _old = (IAudioPolicyConfigFactoryDownlevel)Activate(typeof(IAudioPolicyConfigFactoryDownlevel).GUID); }
+                    catch (Exception ex) { last = ex; }
+                }
+
+                if (!IsAvailable)
+                    Error = $"Windows refused the per-app audio API (build {build}): {last?.Message} [0x{last?.HResult:X8}]";
             }
             catch (Exception ex)
             {
