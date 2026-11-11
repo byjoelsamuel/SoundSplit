@@ -49,3 +49,14 @@ namespace SoundSplit
             throw new NotSupportedException();
     }
 }
+
+namespace SoundSplit
+{
+    /// <summary>One numbered line in the help dialog (number, title, description).</summary>
+    public sealed class Step
+    {
+        public string Item1 { get; set; } = "";
+        public string Item2 { get; set; } = "";
+        public string Item3 { get; set; } = "";
+    }
+}

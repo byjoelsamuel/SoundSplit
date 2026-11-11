@@ -12,7 +12,8 @@ WPF / .NET 8 source for SoundSplit. See the [main README](../README.md) for usag
 | `Core/TestTone.cs` | Device test chime |
 | `Core/DemoData.cs` | Sample data for `--demo` |
 | `ViewModels/` | UI state and commands |
-| `Themes/` | `Aero`, `Classic`, `Midnight` palettes and shared control styles |
+| `Themes/` | `Light`, `Midnight`, `Aero`, `Classic` palettes, line icons (`Icons.xaml`) and shared control styles |
+| `IconBox.cs` | Renders the vector line icons |
 | `MainWindow.xaml` | Main UI |
 | `App.xaml.cs` | Startup, tray icon, single instance |
 

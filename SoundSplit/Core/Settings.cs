@@ -25,7 +25,7 @@ namespace SoundSplit.Core
     internal sealed class AppSettings
     {
         public bool Enabled { get; set; } = true;
-        public string Theme { get; set; } = "Aero";
+        public string Theme { get; set; } = "Light";
         public bool CloseToTray { get; set; } = true;
         public bool ShowMicPicker { get; set; }
         public bool SeenTutorial { get; set; }

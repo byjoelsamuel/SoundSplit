@@ -5,8 +5,8 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <!-- [0] active theme (swapped by ThemeManager)  [1] control styles -->
-                <ResourceDictionary Source="Themes/Aero.xaml" />
+                <!-- [0] active theme (swapped by ThemeManager)  [1] control styles + icons -->
+                <ResourceDictionary Source="Themes/Light.xaml" />
                 <ResourceDictionary Source="Themes/Controls.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

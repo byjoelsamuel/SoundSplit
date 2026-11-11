@@ -8,7 +8,7 @@
     <CornerRadius x:Key="Radius.Card">24</CornerRadius>
     <CornerRadius x:Key="Radius.Tile">16</CornerRadius>
     <CornerRadius x:Key="Radius.Button">17</CornerRadius>
-    <CornerRadius x:Key="Radius.Round">20</CornerRadius>
+    <CornerRadius x:Key="Radius.Round">16</CornerRadius>
     <CornerRadius x:Key="Radius.Switch">14</CornerRadius>
     <CornerRadius x:Key="Radius.Thumb">11</CornerRadius>
     <Thickness x:Key="Thickness.Border">1.5</Thickness>
@@ -39,6 +39,9 @@
         <GradientStop Color="#D9FFFFFF" Offset="0" />
         <GradientStop Color="#99DDF4FF" Offset="1" />
     </LinearGradientBrush>
+
+    <SolidColorBrush x:Key="Brush.Divider" Color="#4D8EC6E6" />
+    <SolidColorBrush x:Key="Brush.RowHover" Color="#33FFFFFF" />
 
     <SolidColorBrush x:Key="Brush.Text" Color="#FF0B2E4A" />
     <SolidColorBrush x:Key="Brush.SubText" Color="#FF4A6A82" />

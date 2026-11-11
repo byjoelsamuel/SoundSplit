@@ -54,7 +54,7 @@ namespace SoundSplit.ViewModels
             SupportMessage = policy.Error ?? "";
 
             ToggleEnabledCommand = new RelayCommand(() => IsEnabled = !IsEnabled);
-            TestDeviceCommand = new RelayCommand(p => { if (p is string id) { _ = TestTone.PlayAsync(id); Toast("Playing a test chime… listen for it!"); } });
+            TestDeviceCommand = new RelayCommand(p => { if (p is string id) { _ = TestTone.PlayAsync(id); Toast("Playing test sound…"); } });
             OpenAddAppCommand = new RelayCommand(OpenAddApp);
             CloseOverlaysCommand = new RelayCommand(() => { ShowAddApp = false; ShowTutorial = false; ShowResetConfirm = false; ShowSettings = false; });
             AddPickedAppCommand = new RelayCommand(p => { if (p is PickerItem pi) AddApp(pi.Key, pi.DisplayName, pi.ExePath); });
@@ -90,6 +90,9 @@ namespace SoundSplit.ViewModels
 
         // ------------------------------------------------------------------ state
 
+        public string Version { get; } =
+            "v" + (System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0");
+
         public bool IsSupported { get; }
         public string SupportMessage { get; }
 
@@ -103,7 +106,7 @@ namespace SoundSplit.ViewModels
                 _settings.Enabled = value;
                 _settings.Save();
                 Refresh();
-                Toast(value ? "SoundSplit is on. Your picks are live." : "SoundSplit is off. Every app follows Windows again.");
+                Toast(value ? "Routing on." : "Routing off. All apps use the system default.");
                 EnabledChanged?.Invoke(this, EventArgs.Empty);
             }
         }
@@ -167,6 +170,9 @@ namespace SoundSplit.ViewModels
 
         private bool _hasApps; public bool HasApps { get => _hasApps; private set => Set(ref _hasApps, value); }
 
+        private string _defaultDeviceName = "your default device";
+        public string DefaultDeviceName { get => _defaultDeviceName; private set => Set(ref _defaultDeviceName, value); }
+
         public void Toast(string text)
         {
             ToastText = text;
@@ -214,7 +220,7 @@ namespace SoundSplit.ViewModels
                 item.IsPlaying = g.Sessions.Any(s => s.IsActive);
                 var active = g.Sessions.Where(s => s.IsActive).ToList();
                 var where = (active.Count > 0 ? active : g.Sessions).Select(s => s.DeviceName).Distinct().ToList();
-                item.Status = (item.IsPlaying ? "Playing on " : "Quiet · on ") + string.Join(" + ", where);
+                item.Status = string.Join(" + ", where);
                 var loudest = (active.Count > 0 ? active : g.Sessions).OrderByDescending(s => s.Volume).First();
                 item.SyncVolume(loudest.Volume, g.Sessions.All(s => s.IsMuted));
             }
@@ -229,7 +235,7 @@ namespace SoundSplit.ViewModels
                 item.Pids.AddRange(ProcessInfo.FindPidsByKey(key));
                 item.IsRunning = item.Pids.Count > 0;
                 item.IsPlaying = false;
-                item.Status = item.IsRunning ? "Open · not playing anything yet" : "Not running · will switch when you open it";
+                item.Status = item.IsRunning ? "Running, no audio yet" : "Not running";
             }
 
             // Drop cards for apps that closed and have nothing saved.
@@ -250,14 +256,17 @@ namespace SoundSplit.ViewModels
             foreach (var d in OutputDevices)
             {
                 var n = _settings.Rules.Values.Count(r => r.OutputDeviceId == d.Id);
-                d.Detail = (d.IsDefault ? "Windows default" : "Extra device") + (n > 0 ? $" · {n} app{(n == 1 ? "" : "s")} sent here" : "");
+                var routedHere = n > 0 ? $"{n} app{(n == 1 ? "" : "s")} routed" : "";
+                d.Detail = d.IsDefault ? (n > 0 ? "Default · " + routedHere : "Default output")
+                                       : (n > 0 ? routedHere : "Not in use");
             }
 
             var routed = _settings.Rules.Values.Count(r => !string.IsNullOrEmpty(r.OutputDeviceId) || !string.IsNullOrEmpty(r.InputDeviceId));
-            Summary = !IsSupported ? "Not supported on this Windows version"
-                    : !IsEnabled ? "Off · every app follows Windows"
-                    : routed == 0 ? "On · pick an app below to send it somewhere else"
-                    : $"On · {routed} app{(routed == 1 ? "" : "s")} on a separate device";
+            Summary = !IsSupported ? "Unavailable"
+                    : !IsEnabled ? "Off"
+                    : routed == 0 ? "On · no apps routed yet"
+                    : $"On · {routed} app{(routed == 1 ? "" : "s")} routed";
+            DefaultDeviceName = outs.FirstOrDefault(d => d.IsDefault)?.Name ?? "your default device";
         }
 
         private AppItem GetOrCreate(string key, string? path, string? savedName = null)
@@ -303,19 +312,19 @@ namespace SoundSplit.ViewModels
             if (outSig != _outSignature)
             {
                 _outSignature = outSig;
-                Rebuild(OutputOptions, outs, "Default (follow Windows)", r => (r.OutputDeviceId, r.OutputDeviceName));
+                Rebuild(OutputOptions, outs, "System default", Glyphs.Default, r => (r.OutputDeviceId, r.OutputDeviceName));
             }
             if (inSig != _inSignature)
             {
                 _inSignature = inSig;
-                Rebuild(InputOptions, ins, "Default mic", r => (r.InputDeviceId, r.InputDeviceName));
+                Rebuild(InputOptions, ins, "Default mic", Glyphs.Get("I.Mic"), r => (r.InputDeviceId, r.InputDeviceName));
             }
         }
 
         private void Rebuild(ObservableCollection<DeviceOption> options, List<AudioDevice> devices, string defaultLabel,
-                             Func<RouteRule, (string? Id, string? Name)> pick)
+                             System.Windows.Media.Geometry? defaultGlyph, Func<RouteRule, (string? Id, string? Name)> pick)
         {
-            var wanted = new List<DeviceOption> { new("", defaultLabel, Glyphs.Default) };
+            var wanted = new List<DeviceOption> { new("", defaultLabel, defaultGlyph) };
             wanted.AddRange(devices.Select(d => new DeviceOption(d.Id, d.Name, Glyphs.For(d.Kind))));
             // Saved devices that are unplugged right now still need to show up in the dropdown.
             foreach (var r in _settings.Rules.Values)
@@ -365,9 +374,9 @@ namespace SoundSplit.ViewModels
             if (deviceId == "" && !_demo) _router.ResetApp(app.Key);
             Refresh();
 
-            if (!IsEnabled) Toast("Saved. Turn SoundSplit on to make it happen.");
-            else if (deviceId == "") Toast($"{app.DisplayName} follows Windows again.");
-            else Toast($"{app.DisplayName} {(input ? "mic" : "sound")} → {label}. No change? Pause & play it once.");
+            if (!IsEnabled) Toast("Saved. Turn routing on to apply it.");
+            else if (deviceId == "") Toast($"{app.DisplayName} → System default");
+            else Toast($"{app.DisplayName} {(input ? "mic" : "output")} → {label}. If it doesn't switch, restart playback.");
         }
 
         internal void OnVolumeChanged(AppItem app, float? volume, bool? mute)
@@ -422,7 +431,7 @@ namespace SoundSplit.ViewModels
             _settings.Save();
             ShowAddApp = false;
             Refresh();
-            Toast($"{name} added. Now pick where it should play.");
+            Toast($"{name} added. Choose an output device.");
         }
 
         private void RemoveApp(AppItem app)
@@ -432,7 +441,7 @@ namespace SoundSplit.ViewModels
             _router.ResetApp(app.Key);
             app.LoadRoute("", "");
             Refresh();
-            Toast($"{app.DisplayName} removed and back on the default device.");
+            Toast($"{app.DisplayName} removed.");
         }
 
         private void ResetAll()
@@ -444,7 +453,7 @@ namespace SoundSplit.ViewModels
             foreach (var a in Apps) a.LoadRoute("", "");
             _outSignature = _inSignature = "";
             Refresh();
-            Toast(ok ? "Everything reset. All apps follow Windows again." : "Couldn't reach Windows' audio settings.");
+            Toast(ok ? "All routing reset." : "Couldn't reach Windows audio settings.");
         }
 
         public void Dispose()
