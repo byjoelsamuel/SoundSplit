@@ -82,6 +82,9 @@ namespace SoundSplit.Core
         public bool IsAvailable => _new != null || _old != null;
         public string? Error { get; }
 
+        /// <summary>HRESULT of the last failed routing call (0 if it succeeded). Shown in diagnostics.</summary>
+        public int LastHResult { get; private set; }
+
         public AudioPolicyConfig()
         {
             try
@@ -161,18 +164,19 @@ namespace SoundSplit.Core
                     if (WindowsCreateString(full, (uint)full.Length, out hString) != 0) return false;
                 }
 
-                var ok = true;
+                LastHResult = 0;
                 foreach (var role in new[] { ERole.Console, ERole.Multimedia })
                 {
                     var hr = _new != null
                         ? _new.SetPersistedDefaultAudioEndpoint((uint)processId, flow, role, hString)
                         : _old!.SetPersistedDefaultAudioEndpoint((uint)processId, flow, role, hString);
-                    ok &= hr >= 0;
+                    if (hr < 0 && LastHResult == 0) LastHResult = hr;
                 }
-                return ok;
+                return LastHResult == 0;
             }
-            catch
+            catch (Exception ex)
             {
+                LastHResult = ex.HResult;
                 return false;
             }
             finally

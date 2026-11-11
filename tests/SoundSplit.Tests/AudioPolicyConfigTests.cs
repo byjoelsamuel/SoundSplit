@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using SoundSplit.Core;
 using Xunit;
@@ -38,9 +39,24 @@ namespace SoundSplit.Tests
             Skip.IfNot(OperatingSystem.IsWindows(), "Windows only");
             var policy = new AudioPolicyConfig();
             Skip.IfNot(policy.IsAvailable, policy.Error ?? "unavailable");
+            // Routing calls go through the Windows Audio service, which is off on some CI servers.
+            Skip.IfNot(AudioServiceRunning(), "Windows Audio service isn't running on this machine");
             var pid = Environment.ProcessId;
-            Assert.True(policy.SetAppOutput(pid, null), "clearing our own route should succeed");
+            Assert.True(policy.SetAppOutput(pid, null), $"clearing our own route failed: HRESULT 0x{policy.LastHResult:X8}");
             Assert.Null(policy.GetAppOutput(pid));
+        }
+
+        private static bool AudioServiceRunning()
+        {
+            try
+            {
+                using var p = Process.Start(new ProcessStartInfo("sc.exe", "query Audiosrv")
+                    { RedirectStandardOutput = true, UseShellExecute = false, CreateNoWindow = true })!;
+                var output = p.StandardOutput.ReadToEnd();
+                p.WaitForExit(5000);
+                return output.Contains("RUNNING", StringComparison.OrdinalIgnoreCase);
+            }
+            catch { return false; }
         }
     }
 }

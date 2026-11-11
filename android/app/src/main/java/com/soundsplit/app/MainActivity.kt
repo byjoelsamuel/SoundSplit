@@ -63,7 +63,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
@@ -171,10 +170,10 @@ private fun Screen(onStart: () -> Unit, onStop: () -> Unit) {
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
-                    Modifier.size(36.dp).clip(RoundedCornerShape(10.dp))
-                        .background(Brush.linearGradient(listOf(Color(0xFF4F46E5), Color(0xFF06B6D4)))),
+                    Modifier.size(38.dp).clip(RoundedCornerShape(11.dp)).background(Color.White)
+                        .border(BorderStroke(2.dp, Ink), RoundedCornerShape(11.dp)),
                     contentAlignment = Alignment.Center,
-                ) { Image(painterResource(R.drawable.ic_glyph), null, Modifier.size(24.dp)) }
+                ) { Image(painterResource(R.drawable.ic_glyph), null, Modifier.size(30.dp)) }
                 Spacer(Modifier.width(12.dp))
                 Column {
                     Label("SoundSplit", 20.sp, FontWeight.Bold)
