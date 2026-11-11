@@ -468,7 +468,7 @@
                             <Button Style="{StaticResource BtnDanger}" Content="Reset everything" Margin="0,0,8,8" Command="{Binding AskResetAllCommand}" />
                         </WrapPanel>
                         <TextBlock Style="{StaticResource Sub}" FontSize="11" Opacity="0.8" Margin="0,4,0,0"
-                                   Text="SoundSplit 1.0 · free &amp; open source · no account, no internet needed." />
+                                   Text="SoundSplit 1.0.1 · free &amp; open source · no account, no internet needed." />
                     </StackPanel>
                 </ContentControl>
             </Grid>
