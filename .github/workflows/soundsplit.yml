@@ -1,0 +1,45 @@
+name: SoundSplit (Windows app)
+
+on:
+  push:
+    paths:
+      - "SoundSplit/**"
+      - ".github/workflows/soundsplit.yml"
+  pull_request:
+    paths:
+      - "SoundSplit/**"
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Build single-file SoundSplit.exe
+        working-directory: SoundSplit
+        run: >
+          dotnet publish SoundSplit.csproj -c Release -r win-x64 --self-contained true
+          -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:EnableCompressionInSingleFile=true -p:DebugType=none -o publish
+
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: SoundSplit-windows
+          path: SoundSplit/publish/SoundSplit.exe
+
+      - name: Attach to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: SoundSplit/publish/SoundSplit.exe

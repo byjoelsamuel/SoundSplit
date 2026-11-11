@@ -1,0 +1,72 @@
+<!-- Classic 98: teal desktop, silver bevelled windows, navy title bar. -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <FontFamily x:Key="Font.Main">Tahoma, Microsoft Sans Serif</FontFamily>
+    <FontFamily x:Key="Font.Title">Tahoma, Microsoft Sans Serif</FontFamily>
+
+    <CornerRadius x:Key="Radius.Card">3</CornerRadius>
+    <CornerRadius x:Key="Radius.Tile">3</CornerRadius>
+    <CornerRadius x:Key="Radius.Button">3</CornerRadius>
+    <CornerRadius x:Key="Radius.Round">3</CornerRadius>
+    <CornerRadius x:Key="Radius.Switch">2</CornerRadius>
+    <CornerRadius x:Key="Radius.Thumb">1</CornerRadius>
+    <Thickness x:Key="Thickness.Border">2</Thickness>
+    <Visibility x:Key="Show.Bubbles">Collapsed</Visibility>
+
+    <SolidColorBrush x:Key="Brush.Window" Color="#FF008080" />
+    <SolidColorBrush x:Key="Brush.WindowBorder" Color="#FF000000" />
+
+    <LinearGradientBrush x:Key="Brush.TitleBar" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#FF000080" Offset="0" />
+        <GradientStop Color="#FF1084D0" Offset="1" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="Brush.TitleText" Color="#FFFFFFFF" />
+
+    <SolidColorBrush x:Key="Brush.Card" Color="#FFC0C0C0" />
+    <SolidColorBrush x:Key="Brush.CardBorder" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="Brush.CardShine" Color="#00FFFFFF" />
+    <SolidColorBrush x:Key="Brush.Hero" Color="#FFC0C0C0" />
+
+    <SolidColorBrush x:Key="Brush.Text" Color="#FF000000" />
+    <SolidColorBrush x:Key="Brush.SubText" Color="#FF3C3C3C" />
+
+    <SolidColorBrush x:Key="Brush.Accent" Color="#FF000080" />
+    <SolidColorBrush x:Key="Brush.AccentText" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="Brush.AccentBorder" Color="#FF000000" />
+
+    <SolidColorBrush x:Key="Brush.Button" Color="#FFC0C0C0" />
+    <SolidColorBrush x:Key="Brush.ButtonBorder" Color="#FF404040" />
+    <SolidColorBrush x:Key="Brush.ButtonText" Color="#FF000000" />
+    <SolidColorBrush x:Key="Brush.HoverOverlay" Color="#18FFFFFF" />
+    <SolidColorBrush x:Key="Brush.Gloss" Color="#00FFFFFF" />
+
+    <SolidColorBrush x:Key="Brush.Field" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="Brush.FieldBorder" Color="#FF808080" />
+    <SolidColorBrush x:Key="Brush.Popup" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="Brush.PopupBorder" Color="#FF000000" />
+    <SolidColorBrush x:Key="Brush.ItemHover" Color="#FFB9D1EA" />
+    <SolidColorBrush x:Key="Brush.ItemSelected" Color="#FFA6CAF0" />
+
+    <SolidColorBrush x:Key="Brush.SwitchOff" Color="#FF808080" />
+    <SolidColorBrush x:Key="Brush.SwitchOn" Color="#FF000080" />
+    <SolidColorBrush x:Key="Brush.Thumb" Color="#FFC0C0C0" />
+
+    <SolidColorBrush x:Key="Brush.Track" Color="#FF808080" />
+    <SolidColorBrush x:Key="Brush.TrackFill" Color="#FF000080" />
+
+    <SolidColorBrush x:Key="Brush.Chip" Color="#FFFFFFE1" />
+    <SolidColorBrush x:Key="Brush.ChipText" Color="#FF000000" />
+    <SolidColorBrush x:Key="Brush.Good" Color="#FF008000" />
+
+    <SolidColorBrush x:Key="Brush.IconTile" Color="#FF000080" />
+    <SolidColorBrush x:Key="Brush.IconTileText" Color="#FFFFFFFF" />
+
+    <SolidColorBrush x:Key="Brush.Danger" Color="#FF800000" />
+    <SolidColorBrush x:Key="Brush.DangerText" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="Brush.Overlay" Color="#59000000" />
+    <SolidColorBrush x:Key="Brush.Toast" Color="#FFFFFFE1" />
+    <SolidColorBrush x:Key="Brush.ToastText" Color="#FF000000" />
+
+    <DropShadowEffect x:Key="Effect.Card" Color="#FF000000" BlurRadius="0" ShadowDepth="3" Direction="315" Opacity="0.55" />
+</ResourceDictionary>

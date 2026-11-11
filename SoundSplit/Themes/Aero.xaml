@@ -1,0 +1,111 @@
+<!-- Frutiger Aero: sky-to-grass gradient, glossy glass cards, bubble buttons. -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <FontFamily x:Key="Font.Main">pack://application:,,,/Assets/Fonts/#Nunito</FontFamily>
+    <FontFamily x:Key="Font.Title">pack://application:,,,/Assets/Fonts/#Nunito</FontFamily>
+
+    <CornerRadius x:Key="Radius.Card">24</CornerRadius>
+    <CornerRadius x:Key="Radius.Tile">16</CornerRadius>
+    <CornerRadius x:Key="Radius.Button">17</CornerRadius>
+    <CornerRadius x:Key="Radius.Round">20</CornerRadius>
+    <CornerRadius x:Key="Radius.Switch">14</CornerRadius>
+    <CornerRadius x:Key="Radius.Thumb">11</CornerRadius>
+    <Thickness x:Key="Thickness.Border">1.5</Thickness>
+    <Visibility x:Key="Show.Bubbles">Visible</Visibility>
+
+    <LinearGradientBrush x:Key="Brush.Window" StartPoint="0,0" EndPoint="0.3,1">
+        <GradientStop Color="#FF7FD0F5" Offset="0" />
+        <GradientStop Color="#FFC4ECFF" Offset="0.45" />
+        <GradientStop Color="#FFE9FBF1" Offset="0.78" />
+        <GradientStop Color="#FFB5EBB8" Offset="1" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="Brush.WindowBorder" Color="#FF5FAAD6" />
+
+    <LinearGradientBrush x:Key="Brush.TitleBar" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#B3FFFFFF" Offset="0" />
+        <GradientStop Color="#40FFFFFF" Offset="1" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="Brush.TitleText" Color="#FF0B3B5E" />
+
+    <SolidColorBrush x:Key="Brush.Card" Color="#A8FFFFFF" />
+    <SolidColorBrush x:Key="Brush.CardBorder" Color="#F0FFFFFF" />
+    <LinearGradientBrush x:Key="Brush.CardShine" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#80FFFFFF" Offset="0" />
+        <GradientStop Color="#10FFFFFF" Offset="0.5" />
+        <GradientStop Color="#00FFFFFF" Offset="0.51" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="Brush.Hero" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#D9FFFFFF" Offset="0" />
+        <GradientStop Color="#99DDF4FF" Offset="1" />
+    </LinearGradientBrush>
+
+    <SolidColorBrush x:Key="Brush.Text" Color="#FF0B2E4A" />
+    <SolidColorBrush x:Key="Brush.SubText" Color="#FF4A6A82" />
+
+    <LinearGradientBrush x:Key="Brush.Accent" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#FF7BE07F" Offset="0" />
+        <GradientStop Color="#FF3CC04A" Offset="0.5" />
+        <GradientStop Color="#FF22A336" Offset="0.51" />
+        <GradientStop Color="#FF2DBA45" Offset="1" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="Brush.AccentText" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="Brush.AccentBorder" Color="#FF1E8F31" />
+
+    <LinearGradientBrush x:Key="Brush.Button" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#FFFFFFFF" Offset="0" />
+        <GradientStop Color="#FFEAF7FF" Offset="0.5" />
+        <GradientStop Color="#FFD3EEFC" Offset="0.51" />
+        <GradientStop Color="#FFE4F5FF" Offset="1" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="Brush.ButtonBorder" Color="#FF8EC6E6" />
+    <SolidColorBrush x:Key="Brush.ButtonText" Color="#FF0B3B5E" />
+    <SolidColorBrush x:Key="Brush.HoverOverlay" Color="#40FFFFFF" />
+    <LinearGradientBrush x:Key="Brush.Gloss" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#B0FFFFFF" Offset="0" />
+        <GradientStop Color="#20FFFFFF" Offset="1" />
+    </LinearGradientBrush>
+
+    <SolidColorBrush x:Key="Brush.Field" Color="#F2FFFFFF" />
+    <SolidColorBrush x:Key="Brush.FieldBorder" Color="#FF8EC6E6" />
+    <SolidColorBrush x:Key="Brush.Popup" Color="#FAFFFFFF" />
+    <SolidColorBrush x:Key="Brush.PopupBorder" Color="#FF8EC6E6" />
+    <SolidColorBrush x:Key="Brush.ItemHover" Color="#FFDDF2FF" />
+    <SolidColorBrush x:Key="Brush.ItemSelected" Color="#FFBDE5FF" />
+
+    <SolidColorBrush x:Key="Brush.SwitchOff" Color="#FFB4C8D8" />
+    <LinearGradientBrush x:Key="Brush.SwitchOn" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#FF6CDC74" Offset="0" />
+        <GradientStop Color="#FF24A83A" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="Brush.Thumb" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#FFFFFFFF" Offset="0" />
+        <GradientStop Color="#FFE3EEF5" Offset="1" />
+    </LinearGradientBrush>
+
+    <SolidColorBrush x:Key="Brush.Track" Color="#FFC5DCEB" />
+    <LinearGradientBrush x:Key="Brush.TrackFill" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#FF4FC3F7" Offset="0" />
+        <GradientStop Color="#FF0288D1" Offset="1" />
+    </LinearGradientBrush>
+
+    <SolidColorBrush x:Key="Brush.Chip" Color="#3329B6F6" />
+    <SolidColorBrush x:Key="Brush.ChipText" Color="#FF0277BD" />
+    <SolidColorBrush x:Key="Brush.Good" Color="#FF2DBA45" />
+
+    <LinearGradientBrush x:Key="Brush.IconTile" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#FF8AD8FF" Offset="0" />
+        <GradientStop Color="#FF3FA9E8" Offset="0.5" />
+        <GradientStop Color="#FF2593D6" Offset="0.51" />
+        <GradientStop Color="#FF3BB0EE" Offset="1" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="Brush.IconTileText" Color="#FFFFFFFF" />
+
+    <SolidColorBrush x:Key="Brush.Danger" Color="#FFE5484D" />
+    <SolidColorBrush x:Key="Brush.DangerText" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="Brush.Overlay" Color="#730B2E4A" />
+    <SolidColorBrush x:Key="Brush.Toast" Color="#F00B2E4A" />
+    <SolidColorBrush x:Key="Brush.ToastText" Color="#FFFFFFFF" />
+
+    <DropShadowEffect x:Key="Effect.Card" Color="#FF1B5F8C" BlurRadius="22" ShadowDepth="4" Direction="270" Opacity="0.18" />
+</ResourceDictionary>
