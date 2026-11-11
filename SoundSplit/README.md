@@ -34,10 +34,9 @@ Some Samsung phones have a setting called **"Separate app sound"**. You pick an 
 
 ### Step 1: Get the app
 
-1. Open this repo on GitHub → the **Actions** tab → the latest **"SoundSplit (Windows app)"** run.
-2. Scroll down to **Artifacts** and download **SoundSplit-windows**.
-   *(If someone has published a **Release**, you can grab `SoundSplit.exe` from the Releases page instead.)*
-3. Unzip it. You get one file: **`SoundSplit.exe`**. Put it anywhere you like, for example on your Desktop or in `Documents\Apps`.
+1. Open the **[Releases page](https://github.com/byjoelsamuel/md-player/releases/latest)** of this repo.
+2. Under **Assets**, download **`SoundSplit.exe`**.
+3. Put it anywhere you like, for example on your Desktop or in `Documents\Apps`.
 
 > You don't need to install anything else. The .NET runtime is built into the .exe, which is why it's about 70 MB.
 
@@ -166,8 +165,8 @@ dotnet publish -c Release -r win-x64 --self-contained true `
 # → publish\SoundSplit.exe
 ```
 
-Every push that changes `SoundSplit/` also gets built automatically by GitHub Actions (`.github/workflows/soundsplit.yml`).
-When you publish a GitHub **Release**, the workflow attaches `SoundSplit.exe` to it.
+Every push that changes `SoundSplit/` is built automatically by GitHub Actions (`.github/workflows/soundsplit.yml`).
+To publish a new version, push a tag like `v1.0.2`. The workflow builds `SoundSplit.exe` and creates a GitHub Release with it attached.
 
 ---
 
