@@ -57,10 +57,5 @@ jobs:
           files: SoundSplit/publish/SoundSplit.exe
           generate_release_notes: true
           body: |
-            ## SoundSplit ${{ inputs.version || github.ref_name }}
-            Pick which speaker or headphones each app plays on in Windows 10/11.
-
-            **Download `SoundSplit.exe` below**, double-click it, and if Windows shows
-            "Windows protected your PC" click **More info → Run anyway**.
-
-            New here? Read the [step-by-step tutorial](https://github.com/${{ github.repository }}/blob/main/SoundSplit/README.md).
+            Download `SoundSplit.exe` below. Windows 10 1803+ / Windows 11, no install required.
+            The exe is unsigned; if SmartScreen appears, choose *More info → Run anyway*.

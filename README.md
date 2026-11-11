@@ -1,27 +1,59 @@
-<p align="center">
-  <img src="SoundSplit/Assets/logo.png" width="110" alt="SoundSplit logo" />
-</p>
+<img src="SoundSplit/Assets/logo.png" width="72" align="right" alt="" />
 
-<h1 align="center">SoundSplit</h1>
+# SoundSplit
 
-<p align="center"><b>Choose which speaker or headphones each app plays on in Windows 10 and 11.</b><br/>
-Spotify in your IEMs, the game on your speakers, Discord on your headset, all at the same time.</p>
+Per-app audio output for Windows 10/11. Route any app to its own speaker or headphones and leave everything else on the default device.
 
-<p align="center">
-  <a href="https://github.com/byjoelsamuel/md-player/releases/latest"><b>⬇️ Download the latest SoundSplit.exe</b></a>
-</p>
+**[Download the latest release](https://github.com/byjoelsamuel/md-player/releases/latest)**
 
----
+## Features
 
-### Quick start
+- Pick an output device (and optionally a mic) for each app
+- Choices persist and re-apply when the app starts
+- Per-app volume and mute
+- Test chime to identify devices
+- Tray icon, start with Windows
+- Themes: Aero, Classic 98, Midnight
 
-1. Download **`SoundSplit.exe`** from the [latest release](https://github.com/byjoelsamuel/md-player/releases/latest).
-2. Double-click it. If Windows says *"Windows protected your PC"*, click **More info → Run anyway** (the app just isn't code-signed).
-3. Make sure **Turn on now** is green.
-4. Play something in the app you want to move, then pick a device in its **PLAY ON** dropdown. Done!
+Routing is handled by Windows itself (the same mechanism as *Settings → Sound → Volume mixer*), so no drivers or virtual cables are needed and no latency is added.
 
-👉 **[Full step-by-step tutorial, tips and troubleshooting](SoundSplit/README.md)**
+## Usage
 
----
+1. Run `SoundSplit.exe`. It's unsigned, so SmartScreen may ask: *More info → Run anyway*.
+2. Make sure **Turn on now** is enabled.
+3. Play audio in an app, or add it with **Add an app**.
+4. Choose a device from the app's **Play on** dropdown.
 
-Free & open source · no account · no internet · no API keys.
+If an app doesn't switch immediately, pause and resume playback. Some apps need a restart.
+
+Settings live in `%AppData%\SoundSplit\`. Run with `--demo` to preview the UI with sample data.
+
+## Requirements
+
+Windows 10 1803 or later. The release is a self-contained single-file exe, so no .NET install is needed.
+
+## Building
+
+Requires the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0).
+
+```powershell
+cd SoundSplit
+dotnet run
+dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -o publish
+```
+
+Releases are built by GitHub Actions. Run the *SoundSplit (Windows app)* workflow with a version (e.g. `v1.0.2`) or push a `v*` tag.
+
+## Project structure
+
+```
+SoundSplit/
+  Core/         audio routing, device/session access, settings
+  ViewModels/   UI state
+  Themes/       theme palettes and control styles
+  Assets/       icon, logo, font
+```
+
+## Credits
+
+[NAudio](https://github.com/naudio/NAudio) (MIT) · [Nunito](https://fonts.google.com/specimen/Nunito) (OFL) · per-app endpoint research from [EarTrumpet](https://github.com/File-New-Project/EarTrumpet)
