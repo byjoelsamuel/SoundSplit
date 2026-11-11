@@ -166,7 +166,7 @@ dotnet publish -c Release -r win-x64 --self-contained true `
 ```
 
 Every push that changes `SoundSplit/` is built automatically by GitHub Actions (`.github/workflows/soundsplit.yml`).
-To publish a new version, push a tag like `v1.0.2`. The workflow builds `SoundSplit.exe` and creates a GitHub Release with it attached.
+To publish a new version, open **Actions → SoundSplit (Windows app) → Run workflow**, type a version like `v1.0.2` and press **Run** (or push a tag like `v1.0.2`). The workflow builds `SoundSplit.exe` and creates a GitHub Release with it attached.
 
 ---
 
