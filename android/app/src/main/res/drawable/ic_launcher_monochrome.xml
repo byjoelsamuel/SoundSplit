@@ -1,0 +1,9 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <group android:translateX="18" android:translateY="18" android:scaleX="3.0" android:scaleY="3.0">
+        <path android:fillColor="#FF000000" android:pathData="M5.15,9.4 H6.35 A0.55,0.55 0 0 1 6.9,9.95 V14.05 A0.55,0.55 0 0 1 6.35,14.6 H5.15 A0.55,0.55 0 0 1 4.6,14.05 V9.95 A0.55,0.55 0 0 1 5.15,9.4 Z M6.5,9.6 L9.9,6.6 L9.9,17.4 L6.5,14.4 Z M10.2,6.1 A0.7,0.7 0 0 1 10.9,6.8 V17.2 A0.7,0.7 0 0 1 9.5,17.2 V6.8 A0.7,0.7 0 0 1 10.2,6.1 Z M11,10.2 A1.3,1.8 0 0 1 11,13.8 Z" />
+        <path android:strokeColor="#FF000000" android:strokeWidth="0.95" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M12.9,11 C14,11 13.6,6.9 15.4,6.9 M13.1,12 L15.6,12 M12.9,13 C14,13 13.6,17.1 15.4,17.1" />
+        <path android:fillColor="#FF000000" android:pathData="M15.9,5 H18.3 A0.9,0.9 0 0 1 19.2,5.9 V7.9 A0.9,0.9 0 0 1 18.3,8.8 H15.9 A0.9,0.9 0 0 1 15,7.9 V5.9 A0.9,0.9 0 0 1 15.9,5 Z" />
+        <path android:fillColor="#FF000000" android:pathData="M16.1,10.1 H18.5 A0.9,0.9 0 0 1 19.4,11 V13 A0.9,0.9 0 0 1 18.5,13.9 H16.1 A0.9,0.9 0 0 1 15.2,13 V11 A0.9,0.9 0 0 1 16.1,10.1 Z" />
+        <path android:fillColor="#FF000000" android:pathData="M15.9,15.2 H18.3 A0.9,0.9 0 0 1 19.2,16.1 V18.1 A0.9,0.9 0 0 1 18.3,19 H15.9 A0.9,0.9 0 0 1 15,18.1 V16.1 A0.9,0.9 0 0 1 15.9,15.2 Z" />
+    </group>
+</vector>

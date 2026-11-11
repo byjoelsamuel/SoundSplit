@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Plain net8.0 so the core logic can be tested on any OS. The files under test are
+    compiled in directly (they don't depend on WPF). Windows-only checks skip elsewhere.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <!-- Windows-only interop is guarded at runtime (tests skip off Windows). -->
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\SoundSplit\Core\EndpointIds.cs" Link="Linked\EndpointIds.cs" />
+    <Compile Include="..\..\SoundSplit\Core\AudioPolicyConfig.cs" Link="Linked\AudioPolicyConfig.cs" />
+    <Compile Include="..\..\SoundSplit\Core\Router.cs" Link="Linked\Router.cs" />
+    <Compile Include="..\..\SoundSplit\Core\Settings.cs" Link="Linked\Settings.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+    <PackageReference Include="Xunit.SkippableFact" Version="1.4.13" />
+  </ItemGroup>
+
+</Project>
