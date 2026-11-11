@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# SoundSplit (.NET)
+SoundSplit/bin/
+SoundSplit/obj/
+SoundSplit/publish/

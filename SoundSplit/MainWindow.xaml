@@ -1,0 +1,623 @@
+<Window x:Class="SoundSplit.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:SoundSplit.ViewModels"
+        Title="SoundSplit"
+        Width="1060" Height="740" MinWidth="880" MinHeight="580"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None" ResizeMode="CanResize"
+        Background="{DynamicResource Brush.Window}"
+        FontFamily="{DynamicResource Font.Main}"
+        Foreground="{DynamicResource Brush.Text}"
+        FontSize="13.5"
+        TextOptions.TextFormattingMode="Display"
+        UseLayoutRounding="True"
+        Icon="pack://application:,,,/Assets/SoundSplit.ico">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="56" ResizeBorderThickness="6" GlassFrameThickness="0"
+                      CornerRadius="0" UseAeroCaptionButtons="False" />
+    </WindowChrome.WindowChrome>
+
+    <Window.Resources>
+        <!-- How a device looks inside the dropdowns -->
+        <DataTemplate x:Key="DeviceOptionTemplate" DataType="{x:Type vm:DeviceOption}">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding Glyph}" Style="{StaticResource Glyph}" FontSize="14" Width="20"
+                           Foreground="{DynamicResource Brush.SubText}" />
+                <TextBlock x:Name="Lbl" Text="{Binding Label}" Margin="8,0,0,0" VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis" FontWeight="SemiBold" />
+            </StackPanel>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsMissing}" Value="True">
+                    <Setter TargetName="Lbl" Property="Opacity" Value="0.6" />
+                    <Setter TargetName="Lbl" Property="FontStyle" Value="Italic" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Border x:Name="Frame" BorderBrush="{DynamicResource Brush.WindowBorder}" BorderThickness="1">
+        <Grid x:Name="Root">
+
+            <!-- ======================================================= Aero bubbles (decoration) -->
+            <Canvas IsHitTestVisible="False" Visibility="{DynamicResource Show.Bubbles}" ClipToBounds="True">
+                <Canvas.Resources>
+                    <RadialGradientBrush x:Key="Bubble" GradientOrigin="0.35,0.3" Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
+                        <GradientStop Color="#CCFFFFFF" Offset="0" />
+                        <GradientStop Color="#33FFFFFF" Offset="0.55" />
+                        <GradientStop Color="#55BDEBFF" Offset="0.92" />
+                        <GradientStop Color="#99FFFFFF" Offset="1" />
+                    </RadialGradientBrush>
+                </Canvas.Resources>
+                <Ellipse Canvas.Left="-60" Canvas.Top="380" Width="220" Height="220" Fill="{StaticResource Bubble}" Opacity="0.6" />
+                <Ellipse Canvas.Left="140" Canvas.Top="560" Width="90" Height="90" Fill="{StaticResource Bubble}" Opacity="0.7" />
+                <Ellipse Canvas.Left="610" Canvas.Top="70" Width="60" Height="60" Fill="{StaticResource Bubble}" Opacity="0.7" />
+                <Ellipse Canvas.Left="900" Canvas.Top="420" Width="260" Height="260" Fill="{StaticResource Bubble}" Opacity="0.5" />
+                <Ellipse Canvas.Left="820" Canvas.Top="600" Width="70" Height="70" Fill="{StaticResource Bubble}" Opacity="0.7" />
+                <Ellipse Canvas.Left="470" Canvas.Top="640" Width="40" Height="40" Fill="{StaticResource Bubble}" Opacity="0.8" />
+            </Canvas>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="56" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- ======================================================= Title bar -->
+                <Border Background="{DynamicResource Brush.TitleBar}">
+                    <DockPanel Margin="16,0,10,0" LastChildFill="False">
+                        <Image Source="pack://application:,,,/Assets/logo.png" Width="30" Height="30"
+                               DockPanel.Dock="Left" RenderOptions.BitmapScalingMode="HighQuality" />
+                        <TextBlock Text="SoundSplit" DockPanel.Dock="Left" Margin="10,0,0,0" VerticalAlignment="Center"
+                                   FontFamily="{DynamicResource Font.Title}" FontWeight="ExtraBold" FontSize="18"
+                                   Foreground="{DynamicResource Brush.TitleText}" />
+                        <Border DockPanel.Dock="Left" Margin="14,0,0,0" Style="{StaticResource Chip}">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Width="8" Height="8" VerticalAlignment="Center" Margin="0,0,6,0"
+                                         Fill="{DynamicResource Brush.Good}"
+                                         Visibility="{Binding IsEnabled, Converter={StaticResource BoolToVis}}" />
+                                <TextBlock Text="{Binding Summary}" FontSize="12" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Brush.ChipText}" />
+                            </StackPanel>
+                        </Border>
+
+                        <Button DockPanel.Dock="Right" Style="{StaticResource BtnClose}" Content="&#xE8BB;"
+                                ToolTip="Close" Click="OnCloseClick" WindowChrome.IsHitTestVisibleInChrome="True" />
+                        <Button DockPanel.Dock="Right" Style="{StaticResource BtnChrome}" Content="&#xE921;"
+                                ToolTip="Minimise" Click="OnMinimizeClick" WindowChrome.IsHitTestVisibleInChrome="True" />
+                        <Rectangle DockPanel.Dock="Right" Width="1" Height="20" Margin="8,0,4,0"
+                                   Fill="{DynamicResource Brush.TitleText}" Opacity="0.25" />
+                        <Button DockPanel.Dock="Right" Style="{StaticResource BtnChrome}" Content="&#xE713;"
+                                ToolTip="Settings &amp; themes" Command="{Binding ShowSettingsCommand}"
+                                WindowChrome.IsHitTestVisibleInChrome="True" />
+                        <Button DockPanel.Dock="Right" Style="{StaticResource BtnChrome}" Content="&#xE897;"
+                                ToolTip="How it works" Command="{Binding ShowTutorialCommand}"
+                                WindowChrome.IsHitTestVisibleInChrome="True" />
+                    </DockPanel>
+                </Border>
+
+                <!-- ======================================================= Content -->
+                <Grid Grid.Row="1" Margin="20,8,20,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.75*" />
+                        <ColumnDefinition Width="20" />
+                        <ColumnDefinition Width="1*" MinWidth="280" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left column: hero + apps -->
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                                  Padding="0,0,6,0">
+                        <StackPanel Margin="4,4,4,8">
+
+                            <!-- Hero, like the phone feature this is based on -->
+                            <ContentControl Style="{StaticResource HeroCard}" Padding="24,22">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Illustration: main speaker with many apps, second device with one app -->
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,26,0">
+                                        <StackPanel>
+                                            <Border Width="78" Height="92" CornerRadius="{DynamicResource Radius.Tile}"
+                                                    Background="{DynamicResource Brush.IconTile}">
+                                                <Grid>
+                                                    <Border Height="34" VerticalAlignment="Top" Margin="4,3,4,0"
+                                                            CornerRadius="{DynamicResource Radius.Tile}" Background="{DynamicResource Brush.Gloss}" />
+                                                    <TextBlock Text="&#xE7F5;" Style="{StaticResource Glyph}" FontSize="38"
+                                                               Foreground="{DynamicResource Brush.IconTileText}" />
+                                                </Grid>
+                                            </Border>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                                                <Ellipse Width="16" Height="16" Fill="#FF7FA6F5" Margin="2,0" />
+                                                <Ellipse Width="16" Height="16" Fill="#FFB2DDBE" Margin="2,0" />
+                                                <Ellipse Width="16" Height="16" Fill="#FF63C27A" Margin="2,0" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                        <TextBlock Text="&#xE72A;" Style="{StaticResource Glyph}" FontSize="18" Margin="16,0,16,26"
+                                                   Foreground="{DynamicResource Brush.SubText}" />
+                                        <StackPanel>
+                                            <Border Width="78" Height="92" CornerRadius="{DynamicResource Radius.Tile}"
+                                                    Background="{DynamicResource Brush.Accent}">
+                                                <Grid>
+                                                    <Border Height="34" VerticalAlignment="Top" Margin="4,3,4,0"
+                                                            CornerRadius="{DynamicResource Radius.Tile}" Background="{DynamicResource Brush.Gloss}" />
+                                                    <TextBlock Text="&#xE7F6;" Style="{StaticResource Glyph}" FontSize="38"
+                                                               Foreground="{DynamicResource Brush.AccentText}" />
+                                                </Grid>
+                                            </Border>
+                                            <Ellipse Width="16" Height="16" Fill="#FF4A8F8C" Margin="0,10,0,0" />
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Style="{StaticResource H1}" Text="Separate app sound" />
+                                        <TextBlock Style="{StaticResource Sub}" FontSize="13.5" Margin="0,6,0,0"
+                                                   Text="Play sound from the apps you pick on a different speaker or headphones. Everything else stays on your main device." />
+
+                                        <!-- Big on/off row -->
+                                        <Border Margin="0,16,0,0" Padding="16,10" CornerRadius="{DynamicResource Radius.Card}"
+                                                Background="{DynamicResource Brush.Field}"
+                                                BorderBrush="{DynamicResource Brush.FieldBorder}" BorderThickness="1">
+                                            <DockPanel>
+                                                <ToggleButton DockPanel.Dock="Right" Style="{StaticResource Switch}"
+                                                              IsChecked="{Binding IsEnabled, Mode=TwoWay}"
+                                                              IsEnabled="{Binding IsSupported}"
+                                                              AutomationProperties.Name="Turn SoundSplit on" />
+                                                <TextBlock Text="Turn on now" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" />
+                                            </DockPanel>
+                                        </Border>
+                                    </StackPanel>
+                                </Grid>
+                            </ContentControl>
+
+                            <!-- Not supported banner -->
+                            <Border Margin="0,14,0,0" Padding="14,10" CornerRadius="{DynamicResource Radius.Tile}"
+                                    Background="{DynamicResource Brush.Danger}"
+                                    Visibility="{Binding IsSupported, Converter={StaticResource BoolToVis}, ConverterParameter=invert}">
+                                <TextBlock Foreground="{DynamicResource Brush.DangerText}" TextWrapping="Wrap" FontWeight="SemiBold"
+                                           Text="{Binding SupportMessage, StringFormat='Heads up: {0}'}" />
+                            </Border>
+
+                            <!-- Apps header -->
+                            <DockPanel Margin="6,22,0,10">
+                                <Button DockPanel.Dock="Right" Style="{StaticResource BtnAccent}" Command="{Binding OpenAddAppCommand}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE710;" Style="{StaticResource Glyph}" FontSize="12" Margin="0,0,8,0" />
+                                        <TextBlock Text="Add an app" />
+                                    </StackPanel>
+                                </Button>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource H2}" Text="Apps" FontSize="18" />
+                                    <TextBlock Style="{StaticResource Sub}" Text="Apps that make sound show up here by themselves." />
+                                </StackPanel>
+                            </DockPanel>
+
+                            <!-- Empty state -->
+                            <ContentControl Style="{StaticResource Card}" Padding="24"
+                                            Visibility="{Binding HasApps, Converter={StaticResource BoolToVis}, ConverterParameter=invert}">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <Border Width="64" Height="64" CornerRadius="{DynamicResource Radius.Round}" HorizontalAlignment="Center"
+                                            Background="{DynamicResource Brush.IconTile}">
+                                        <TextBlock Text="&#xE8D6;" Style="{StaticResource Glyph}" FontSize="26"
+                                                   Foreground="{DynamicResource Brush.IconTileText}" />
+                                    </Border>
+                                    <TextBlock Style="{StaticResource H2}" Text="Nothing is playing yet" HorizontalAlignment="Center" Margin="0,12,0,0" />
+                                    <TextBlock Style="{StaticResource Sub}" TextAlignment="Center" MaxWidth="360" Margin="0,4,0,0"
+                                               Text="Play a song or video in any app and it will pop up here. Or press &quot;Add an app&quot; to pick one that's open." />
+                                </StackPanel>
+                            </ContentControl>
+
+                            <!-- App cards -->
+                            <ItemsControl ItemsSource="{Binding Apps}" Focusable="False">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type vm:AppItem}">
+                                        <ContentControl Style="{StaticResource Card}" Margin="0,0,0,12" Padding="16,14">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Icon bubble -->
+                                                <Border Width="52" Height="52" VerticalAlignment="Top"
+                                                        CornerRadius="{DynamicResource Radius.Tile}"
+                                                        Background="{DynamicResource Brush.Field}"
+                                                        BorderBrush="{DynamicResource Brush.FieldBorder}" BorderThickness="1">
+                                                    <Grid>
+                                                        <Image Source="{Binding Icon}" Width="32" Height="32"
+                                                               RenderOptions.BitmapScalingMode="HighQuality"
+                                                               Visibility="{Binding HasIcon, Converter={StaticResource BoolToVis}}" />
+                                                        <Border CornerRadius="{DynamicResource Radius.Tile}" Background="{DynamicResource Brush.IconTile}"
+                                                                Visibility="{Binding HasIcon, Converter={StaticResource BoolToVis}, ConverterParameter=invert}">
+                                                            <TextBlock Text="{Binding Initial}" FontSize="22" FontWeight="ExtraBold"
+                                                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                       Foreground="{DynamicResource Brush.IconTileText}" />
+                                                        </Border>
+                                                    </Grid>
+                                                </Border>
+
+                                                <!-- Name + status -->
+                                                <StackPanel Grid.Column="1" Margin="14,2,12,0" VerticalAlignment="Top">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding DisplayName}" FontSize="16" FontWeight="Bold"
+                                                                   TextTrimming="CharacterEllipsis" MaxWidth="240" />
+                                                        <Border Style="{StaticResource Chip}" Margin="8,0,0,0"
+                                                                Visibility="{Binding IsRouted, Converter={StaticResource BoolToVis}}">
+                                                            <TextBlock Text="Separate" FontSize="11" FontWeight="Bold"
+                                                                       Foreground="{DynamicResource Brush.ChipText}" />
+                                                        </Border>
+                                                    </StackPanel>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                                        <Ellipse Width="8" Height="8" Margin="0,0,6,0" VerticalAlignment="Center"
+                                                                 Fill="{DynamicResource Brush.Good}"
+                                                                 Visibility="{Binding IsPlaying, Converter={StaticResource BoolToVis}}" />
+                                                        <TextBlock Text="{Binding Status}" Style="{StaticResource Sub}" TextWrapping="NoWrap"
+                                                                   TextTrimming="CharacterEllipsis" MaxWidth="260" />
+                                                    </StackPanel>
+
+                                                    <!-- Volume -->
+                                                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0"
+                                                                Visibility="{Binding IsRunning, Converter={StaticResource BoolToVis}}">
+                                                        <ToggleButton Style="{StaticResource BtnIcon}" Width="30" Height="30" FontSize="12"
+                                                                      IsChecked="{Binding IsMuted, Mode=TwoWay}" ToolTip="Mute / unmute this app">
+                                                            <ToggleButton.Content>
+                                                                <TextBlock x:Name="MuteGlyph" Text="&#xE767;" />
+                                                            </ToggleButton.Content>
+                                                        </ToggleButton>
+                                                        <Slider Style="{StaticResource Slider}" Width="160" Margin="10,0,8,0" VerticalAlignment="Center"
+                                                                Value="{Binding Volume, Mode=TwoWay}" ToolTip="This app's volume" />
+                                                        <TextBlock Text="{Binding Volume, StringFormat={}{0:0}%}" Style="{StaticResource Sub}"
+                                                                   VerticalAlignment="Center" Width="38" />
+                                                    </StackPanel>
+                                                </StackPanel>
+
+                                                <!-- Pickers -->
+                                                <StackPanel Grid.Column="2" Width="250" VerticalAlignment="Top">
+                                                    <DockPanel>
+                                                        <Button DockPanel.Dock="Right" Style="{StaticResource BtnChrome}" Width="26" Height="26" Margin="0"
+                                                                Foreground="{DynamicResource Brush.SubText}" FontSize="10" Content="&#xE711;"
+                                                                ToolTip="Remove from list (back to default device)"
+                                                                Command="{Binding DataContext.RemoveAppCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                CommandParameter="{Binding}"
+                                                                Visibility="{Binding IsPinned, Converter={StaticResource BoolToVis}}" />
+                                                        <TextBlock Text="PLAY ON" FontSize="11" FontWeight="ExtraBold" Opacity="0.65"
+                                                                   VerticalAlignment="Center" Margin="4,0,0,4" />
+                                                    </DockPanel>
+                                                    <ComboBox Style="{StaticResource Combo}"
+                                                              ItemsSource="{Binding DataContext.OutputOptions, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                              ItemTemplate="{StaticResource DeviceOptionTemplate}"
+                                                              SelectedValuePath="Id"
+                                                              SelectedValue="{Binding OutputId, Mode=TwoWay}"
+                                                              AutomationProperties.Name="Output device for this app" />
+
+                                                    <StackPanel Visibility="{Binding DataContext.ShowMicPicker, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVis}}">
+                                                        <TextBlock Text="MIC" FontSize="11" FontWeight="ExtraBold" Opacity="0.65" Margin="4,10,0,4" />
+                                                        <ComboBox Style="{StaticResource Combo}"
+                                                                  ItemsSource="{Binding DataContext.InputOptions, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                  ItemTemplate="{StaticResource DeviceOptionTemplate}"
+                                                                  SelectedValuePath="Id"
+                                                                  SelectedValue="{Binding InputId, Mode=TwoWay}"
+                                                                  AutomationProperties.Name="Microphone for this app" />
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </Grid>
+                                        </ContentControl>
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding IsMuted}" Value="True">
+                                                <Setter TargetName="MuteGlyph" Property="Text" Value="&#xE74F;" />
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Right column: devices -->
+                    <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="4,4,4,8">
+                            <ContentControl Style="{StaticResource Card}">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource H2}" Text="Your audio devices" FontSize="18" />
+                                    <TextBlock Style="{StaticResource Sub}" Margin="0,2,0,12"
+                                               Text="Not sure which is which? Press the bell to hear a little chime on it." />
+
+                                    <ItemsControl ItemsSource="{Binding OutputDevices}" Focusable="False">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate DataType="{x:Type vm:DeviceItem}">
+                                                <Border Margin="0,0,0,8" Padding="10" CornerRadius="{DynamicResource Radius.Tile}"
+                                                        Background="{DynamicResource Brush.Field}"
+                                                        BorderBrush="{DynamicResource Brush.FieldBorder}" BorderThickness="1">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Border Width="40" Height="40" CornerRadius="{DynamicResource Radius.Round}"
+                                                                Background="{DynamicResource Brush.IconTile}">
+                                                            <Grid>
+                                                                <Border Height="16" VerticalAlignment="Top" Margin="4,2,4,0"
+                                                                        CornerRadius="{DynamicResource Radius.Round}" Background="{DynamicResource Brush.Gloss}" />
+                                                                <TextBlock Text="{Binding Glyph}" Style="{StaticResource Glyph}" FontSize="18"
+                                                                           Foreground="{DynamicResource Brush.IconTileText}" />
+                                                            </Grid>
+                                                        </Border>
+                                                        <StackPanel Grid.Column="1" Margin="12,0,8,0" VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                                                            <TextBlock Text="{Binding Detail}" Style="{StaticResource Sub}" FontSize="11.5" TextWrapping="NoWrap"
+                                                                       TextTrimming="CharacterEllipsis" />
+                                                        </StackPanel>
+                                                        <Button Grid.Column="2" Style="{StaticResource BtnIcon}" Content="&#xEA8F;"
+                                                                ToolTip="Play a test chime on this device"
+                                                                Command="{Binding DataContext.TestDeviceCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                CommandParameter="{Binding Id}" />
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </ContentControl>
+
+                            <ContentControl Style="{StaticResource Card}" Margin="0,14,0,0">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Width="30" Height="30" CornerRadius="{DynamicResource Radius.Round}" Background="{DynamicResource Brush.Accent}">
+                                            <TextBlock Text="&#xE82F;" Style="{StaticResource Glyph}" FontSize="14" Foreground="{DynamicResource Brush.AccentText}" />
+                                        </Border>
+                                        <TextBlock Style="{StaticResource H2}" Text="Good to know" Margin="10,0,0,0" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <TextBlock Style="{StaticResource Sub}" Margin="0,10,0,0"
+                                               Text="• If an app doesn't switch right away, pause and play it again. A few apps need a restart." />
+                                    <TextBlock Style="{StaticResource Sub}" Margin="0,6,0,0"
+                                               Text="• Windows remembers your choices, even after a reboot. SoundSplit re-applies them when apps open." />
+                                    <TextBlock Style="{StaticResource Sub}" Margin="0,6,0,0"
+                                               Text="• Unplugged a device? The app falls back to your main speaker and moves back when you plug it in." />
+                                    <Button Style="{StaticResource Btn}" Margin="0,14,0,0" HorizontalAlignment="Left"
+                                            Command="{Binding OpenWindowsSoundSettingsCommand}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xE8A7;" Style="{StaticResource Glyph}" FontSize="12" Margin="0,0,8,0" />
+                                            <TextBlock Text="Windows sound settings" />
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </ContentControl>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Grid>
+
+            <!-- ======================================================= Settings flyout -->
+            <Grid Visibility="{Binding ShowSettings, Converter={StaticResource BoolToVis}}">
+                <Border Background="Transparent" MouseDown="OnBackdropClick" />
+                <ContentControl Style="{StaticResource ModalCard}" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                Margin="0,58,16,0" Width="360" Padding="20">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H2}" Text="Look &amp; feel" />
+                        <StackPanel Orientation="Horizontal" Margin="0,12,0,4">
+                            <RadioButton Style="{StaticResource Swatch}" GroupName="Theme"
+                                         Command="{Binding SetThemeCommand}" CommandParameter="Aero"
+                                         IsChecked="{Binding Theme, Mode=OneWay, Converter={StaticResource EqualsToBool}, ConverterParameter=Aero}">
+                                <RadioButton.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="#FF7FD0F5" Offset="0" />
+                                        <GradientStop Color="#FFB5EBB8" Offset="1" />
+                                    </LinearGradientBrush>
+                                </RadioButton.Background>
+                                <TextBlock Text="Aero" FontSize="12" FontWeight="SemiBold" />
+                            </RadioButton>
+                            <RadioButton Style="{StaticResource Swatch}" GroupName="Theme"
+                                         Command="{Binding SetThemeCommand}" CommandParameter="Classic"
+                                         IsChecked="{Binding Theme, Mode=OneWay, Converter={StaticResource EqualsToBool}, ConverterParameter=Classic}">
+                                <RadioButton.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="#FF000080" Offset="0" />
+                                        <GradientStop Color="#FF000080" Offset="0.35" />
+                                        <GradientStop Color="#FFC0C0C0" Offset="0.36" />
+                                        <GradientStop Color="#FF008080" Offset="1" />
+                                    </LinearGradientBrush>
+                                </RadioButton.Background>
+                                <TextBlock Text="Classic 98" FontSize="12" FontWeight="SemiBold" />
+                            </RadioButton>
+                            <RadioButton Style="{StaticResource Swatch}" GroupName="Theme"
+                                         Command="{Binding SetThemeCommand}" CommandParameter="Midnight"
+                                         IsChecked="{Binding Theme, Mode=OneWay, Converter={StaticResource EqualsToBool}, ConverterParameter=Midnight}">
+                                <RadioButton.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="#FF2B2D31" Offset="0" />
+                                        <GradientStop Color="#FF5865F2" Offset="1" />
+                                    </LinearGradientBrush>
+                                </RadioButton.Background>
+                                <TextBlock Text="Midnight" FontSize="12" FontWeight="SemiBold" />
+                            </RadioButton>
+                        </StackPanel>
+
+                        <Rectangle Height="1" Fill="{DynamicResource Brush.SubText}" Opacity="0.2" Margin="0,14" />
+
+                        <DockPanel Margin="0,0,0,12">
+                            <ToggleButton DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding StartWithWindows, Mode=TwoWay}" />
+                            <StackPanel>
+                                <TextBlock Text="Start with Windows" FontWeight="Bold" />
+                                <TextBlock Style="{StaticResource Sub}" Text="Opens quietly in the tray when you log in." />
+                            </StackPanel>
+                        </DockPanel>
+                        <DockPanel Margin="0,0,0,12">
+                            <ToggleButton DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding CloseToTray, Mode=TwoWay}" />
+                            <StackPanel>
+                                <TextBlock Text="Keep running when closed" FontWeight="Bold" />
+                                <TextBlock Style="{StaticResource Sub}" Text="The X hides it next to the clock." />
+                            </StackPanel>
+                        </DockPanel>
+                        <DockPanel Margin="0,0,0,4">
+                            <ToggleButton DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding ShowMicPicker, Mode=TwoWay}" />
+                            <StackPanel>
+                                <TextBlock Text="Pick a mic per app too" FontWeight="Bold" />
+                                <TextBlock Style="{StaticResource Sub}" Text="E.g. Discord on your headset mic, OBS on your USB mic." />
+                            </StackPanel>
+                        </DockPanel>
+
+                        <Rectangle Height="1" Fill="{DynamicResource Brush.SubText}" Opacity="0.2" Margin="0,14" />
+
+                        <WrapPanel>
+                            <Button Style="{StaticResource Btn}" Content="How it works" Margin="0,0,8,8" Command="{Binding ShowTutorialCommand}" />
+                            <Button Style="{StaticResource BtnDanger}" Content="Reset everything" Margin="0,0,8,8" Command="{Binding AskResetAllCommand}" />
+                        </WrapPanel>
+                        <TextBlock Style="{StaticResource Sub}" FontSize="11" Opacity="0.8" Margin="0,4,0,0"
+                                   Text="SoundSplit 1.0 · free &amp; open source · no account, no internet needed." />
+                    </StackPanel>
+                </ContentControl>
+            </Grid>
+
+            <!-- ======================================================= Add-an-app picker -->
+            <Grid Visibility="{Binding ShowAddApp, Converter={StaticResource BoolToVis}}">
+                <Border Background="{DynamicResource Brush.Overlay}" MouseDown="OnBackdropClick" />
+                <ContentControl Style="{StaticResource ModalCard}" Width="640" MaxHeight="560" Margin="20" Padding="22">
+                    <DockPanel>
+                        <DockPanel DockPanel.Dock="Top">
+                            <Button DockPanel.Dock="Right" Style="{StaticResource BtnIcon}" Content="&#xE8BB;" FontSize="11"
+                                    Command="{Binding CloseOverlaysCommand}" ToolTip="Close" />
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource H1}" Text="Add an app" />
+                                <TextBlock Style="{StaticResource Sub}" Margin="0,2,0,0"
+                                           Text="These apps are open right now. Pick one, then choose where it should play." />
+                            </StackPanel>
+                        </DockPanel>
+
+                        <DockPanel DockPanel.Dock="Bottom" Margin="0,14,0,0">
+                            <Button Style="{StaticResource Btn}" Command="{Binding BrowseExeCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE8E5;" Style="{StaticResource Glyph}" FontSize="12" Margin="0,0,8,0" />
+                                    <TextBlock Text="App not open? Find its .exe" />
+                                </StackPanel>
+                            </Button>
+                        </DockPanel>
+
+                        <Grid Margin="0,16,0,0">
+                            <TextBlock Style="{StaticResource Sub}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,30"
+                                       Text="No other apps with a window are open. Open one, or use the button below."
+                                       Visibility="{Binding PickerApps.Count, Converter={StaticResource CountToVis}}" />
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                <ItemsControl ItemsSource="{Binding PickerApps}" Focusable="False">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type vm:PickerItem}">
+                                            <Button Style="{StaticResource Tile}" Width="136" Height="112" Margin="0,0,10,10"
+                                                    Command="{Binding DataContext.AddPickedAppCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}" ToolTip="{Binding ExePath}">
+                                                <StackPanel VerticalAlignment="Center">
+                                                    <Grid Width="40" Height="40">
+                                                        <Image Source="{Binding Icon}" Width="32" Height="32" RenderOptions.BitmapScalingMode="HighQuality" />
+                                                    </Grid>
+                                                    <TextBlock Text="{Binding DisplayName}" FontWeight="Bold" Margin="0,8,0,0"
+                                                               TextAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                                </StackPanel>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Grid>
+                    </DockPanel>
+                </ContentControl>
+            </Grid>
+
+            <!-- ======================================================= Tutorial -->
+            <Grid Visibility="{Binding ShowTutorial, Converter={StaticResource BoolToVis}}">
+                <Border Background="{DynamicResource Brush.Overlay}" MouseDown="OnBackdropClick" />
+                <ContentControl Style="{StaticResource ModalCard}" Width="560" Margin="20" Padding="28,24">
+                    <StackPanel>
+                        <Image Source="pack://application:,,,/Assets/logo.png" Width="64" Height="64" RenderOptions.BitmapScalingMode="HighQuality" />
+                        <TextBlock Style="{StaticResource H1}" Text="Welcome to SoundSplit" HorizontalAlignment="Center" Margin="0,10,0,0" />
+                        <TextBlock Style="{StaticResource Sub}" HorizontalAlignment="Center" TextAlignment="Center" Margin="0,4,0,18" FontSize="13.5"
+                                   Text="Send any app to its own speaker or headphones in 3 taps." />
+
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Width="36" Height="36" CornerRadius="{DynamicResource Radius.Round}" Background="{DynamicResource Brush.Accent}" VerticalAlignment="Top">
+                                <TextBlock Text="1" FontWeight="ExtraBold" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource Brush.AccentText}" />
+                            </Border>
+                            <StackPanel Grid.Column="1" Margin="14,0,0,0">
+                                <TextBlock Text="Flip the switch" FontWeight="Bold" FontSize="15" />
+                                <TextBlock Style="{StaticResource Sub}" Text="&quot;Turn on now&quot; at the top. Green means it's working." />
+                            </StackPanel>
+                        </Grid>
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Width="36" Height="36" CornerRadius="{DynamicResource Radius.Round}" Background="{DynamicResource Brush.Accent}" VerticalAlignment="Top">
+                                <TextBlock Text="2" FontWeight="ExtraBold" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource Brush.AccentText}" />
+                            </Border>
+                            <StackPanel Grid.Column="1" Margin="14,0,0,0">
+                                <TextBlock Text="Find your app" FontWeight="Bold" FontSize="15" />
+                                <TextBlock Style="{StaticResource Sub}" Text="Play something in it and it appears in the list. Not there? Press &quot;Add an app&quot;." />
+                            </StackPanel>
+                        </Grid>
+                        <Grid Margin="0,0,0,18">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Width="36" Height="36" CornerRadius="{DynamicResource Radius.Round}" Background="{DynamicResource Brush.Accent}" VerticalAlignment="Top">
+                                <TextBlock Text="3" FontWeight="ExtraBold" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource Brush.AccentText}" />
+                            </Border>
+                            <StackPanel Grid.Column="1" Margin="14,0,0,0">
+                                <TextBlock Text="Choose where it plays" FontWeight="Bold" FontSize="15" />
+                                <TextBlock Style="{StaticResource Sub}" Text="Use the &quot;Play on&quot; dropdown on the app's card. Done! Not sure which device is which? Tap the bell next to it." />
+                            </StackPanel>
+                        </Grid>
+
+                        <Border Style="{StaticResource Chip}" HorizontalAlignment="Stretch" Padding="14,10" CornerRadius="{DynamicResource Radius.Tile}">
+                            <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource Brush.ChipText}" FontWeight="SemiBold"
+                                       Text="Tip: if an app keeps playing on the old device, pause and play once (some apps need a restart)." />
+                        </Border>
+
+                        <Button Style="{StaticResource BtnAccent}" Content="Got it, let's go!" HorizontalAlignment="Center"
+                                Margin="0,20,0,0" MinWidth="180" MinHeight="40" FontSize="14"
+                                Command="{Binding CloseOverlaysCommand}" />
+                    </StackPanel>
+                </ContentControl>
+            </Grid>
+
+            <!-- ======================================================= Reset confirm -->
+            <Grid Visibility="{Binding ShowResetConfirm, Converter={StaticResource BoolToVis}}">
+                <Border Background="{DynamicResource Brush.Overlay}" MouseDown="OnBackdropClick" />
+                <ContentControl Style="{StaticResource ModalCard}" Width="420" Padding="24">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource H1}" Text="Reset everything?" />
+                        <TextBlock Style="{StaticResource Sub}" FontSize="13.5" Margin="0,8,0,0"
+                                   Text="Every app goes back to your main device, including choices made in Windows Settings. Your saved apps list is cleared." />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                            <Button Style="{StaticResource Btn}" Content="Cancel" Margin="0,0,10,0" Command="{Binding CloseOverlaysCommand}" />
+                            <Button Style="{StaticResource BtnDanger}" Content="Yes, reset" Command="{Binding ConfirmResetAllCommand}" />
+                        </StackPanel>
+                    </StackPanel>
+                </ContentControl>
+            </Grid>
+
+            <!-- ======================================================= Toast -->
+            <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,24" Padding="18,10"
+                    CornerRadius="{DynamicResource Radius.Button}" Background="{DynamicResource Brush.Toast}"
+                    IsHitTestVisible="False"
+                    Visibility="{Binding HasToast, Converter={StaticResource BoolToVis}}">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="14" ShadowDepth="3" Opacity="0.3" />
+                </Border.Effect>
+                <TextBlock Text="{Binding ToastText}" Foreground="{DynamicResource Brush.ToastText}" FontWeight="SemiBold" />
+            </Border>
+        </Grid>
+    </Border>
+</Window>
