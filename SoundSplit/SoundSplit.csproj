@@ -15,7 +15,7 @@
     <RootNamespace>SoundSplit</RootNamespace>
     <ApplicationIcon>Assets\SoundSplit.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
     <Product>SoundSplit</Product>
     <Description>Pick which speaker or headphones each app plays on.</Description>
     <Copyright>MIT License</Copyright>

@@ -5,10 +5,12 @@ WPF / .NET 8 source for SoundSplit. See the [main README](../README.md) for usag
 | Path | Purpose |
 | --- | --- |
 | `Core/AudioPolicyConfig.cs` | Interop with Windows' per-app default endpoint API |
+| `Core/EndpointIds.cs` | Device id ↔ endpoint path conversion |
 | `Core/AudioDevices.cs` | Device enumeration, audio sessions, per-app volume |
 | `Core/Router.cs` | Applies saved rules to running processes |
 | `Core/ProcessInfo.cs` | Process paths, names, icons |
-| `Core/Settings.cs` | `settings.json` and start-with-Windows |
+| `Core/Settings.cs` | `settings.json` |
+| `Core/Startup.cs` | Start with Windows (per-user Run key) |
 | `Core/TestTone.cs` | Device test chime |
 | `Core/DemoData.cs` | Sample data for `--demo` |
 | `ViewModels/` | UI state and commands |

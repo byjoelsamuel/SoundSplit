@@ -11,11 +11,18 @@ namespace SoundSplit.Core
     /// </summary>
     internal sealed class Router
     {
-        private readonly AudioPolicyConfig _policy;
+        private readonly IEndpointPolicy _policy;
+        private readonly Func<string, List<int>> _pidsForExe;
+        private readonly Func<int, bool> _isAlive;
         // (pid, isInput) -> device id we last told Windows about
         private readonly Dictionary<(int Pid, bool Input), string> _applied = new();
 
-        public Router(AudioPolicyConfig policy) => _policy = policy;
+        public Router(IEndpointPolicy policy, Func<string, List<int>> pidsForExe, Func<int, bool> isAlive)
+        {
+            _policy = policy;
+            _pidsForExe = pidsForExe;
+            _isAlive = isAlive;
+        }
 
         public bool IsAvailable => _policy.IsAvailable;
 
@@ -40,7 +47,7 @@ namespace SoundSplit.Core
                     var useIn = !string.IsNullOrEmpty(inId) && activeInputs.Contains(inId);
                     if (!useOut && !useIn) continue;
 
-                    foreach (var pid in ProcessInfo.FindPidsByKey(exeKey))
+                    foreach (var pid in _pidsForExe(exeKey))
                     {
                         if (useOut) wanted[(pid, false)] = outId!;
                         if (useIn) wanted[(pid, true)] = inId!;
@@ -59,7 +66,7 @@ namespace SoundSplit.Core
             foreach (var key in _applied.Keys.ToList())
             {
                 if (wanted.ContainsKey(key)) continue;
-                if (ProcessInfo.IsAlive(key.Pid))
+                if (_isAlive(key.Pid))
                 {
                     if (key.Input) _policy.SetAppInput(key.Pid, null);
                     else _policy.SetAppOutput(key.Pid, null);
@@ -71,7 +78,7 @@ namespace SoundSplit.Core
         /// <summary>Immediately send one app back to the default device (both output and mic).</summary>
         public void ResetApp(string exeKey)
         {
-            foreach (var pid in ProcessInfo.FindPidsByKey(exeKey))
+            foreach (var pid in _pidsForExe(exeKey))
             {
                 _policy.SetAppOutput(pid, null);
                 _policy.SetAppInput(pid, null);

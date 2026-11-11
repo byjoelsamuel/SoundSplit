@@ -43,13 +43,14 @@ namespace SoundSplit.ViewModels
         public ICommand OpenWindowsSoundSettingsCommand { get; }
         public ICommand SetThemeCommand { get; }
         public ICommand ShowSettingsCommand { get; }
+        public ICommand ToggleMinimalCommand { get; }
 
         internal MainViewModel(AppSettings settings, bool demo = false)
         {
             _settings = settings;
             _demo = demo;
             var policy = new AudioPolicyConfig();
-            _router = new Router(policy);
+            _router = new Router(policy, ProcessInfo.FindPidsByKey, ProcessInfo.IsAlive);
             IsSupported = demo || policy.IsAvailable;
             SupportMessage = policy.Error ?? "";
 
@@ -66,6 +67,7 @@ namespace SoundSplit.ViewModels
             ConfirmResetAllCommand = new RelayCommand(ResetAll);
             ShowTutorialCommand = new RelayCommand(() => { ShowSettings = false; ShowTutorial = true; });
             ShowSettingsCommand = new RelayCommand(() => ShowSettings = !ShowSettings);
+            ToggleMinimalCommand = new RelayCommand(() => { ShowSettings = false; IsMinimal = !IsMinimal; });
             OpenWindowsSoundSettingsCommand = new RelayCommand(() =>
             {
                 try { Process.Start(new ProcessStartInfo("ms-settings:apps-volume") { UseShellExecute = true }); }
@@ -76,6 +78,7 @@ namespace SoundSplit.ViewModels
             _isEnabled = settings.Enabled;
             _closeToTray = settings.CloseToTray;
             _showMicPicker = settings.ShowMicPicker;
+            _isMinimal = settings.Minimal;
             _startWithWindows = Startup.IsEnabled;
             _showTutorial = !settings.SeenTutorial;
 
@@ -144,6 +147,14 @@ namespace SoundSplit.ViewModels
         {
             get => _showMicPicker;
             set { if (Set(ref _showMicPicker, value)) { _settings.ShowMicPicker = value; _settings.Save(); } }
+        }
+
+        private bool _isMinimal;
+        /// <summary>Compact window: just apps and their output dropdowns.</summary>
+        public bool IsMinimal
+        {
+            get => _isMinimal;
+            set { if (Set(ref _isMinimal, value)) { _settings.Minimal = value; _settings.Save(); } }
         }
 
         private bool _showTutorial;

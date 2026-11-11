@@ -1,19 +1,20 @@
-name: SoundSplit (Windows app)
+name: SoundSplit
 
 on:
   push:
     branches: ["**"]
     paths:
       - "SoundSplit/**"
+      - "android/**"
+      - "tests/**"
+      - "tools/**"
       - ".github/workflows/soundsplit.yml"
     tags: ["v*"]
   pull_request:
-    paths:
-      - "SoundSplit/**"
   workflow_dispatch:
     inputs:
       version:
-        description: "Release version to publish, e.g. v1.0.2 (leave empty to just build)"
+        description: "Release version to publish, e.g. v1.2.1 (leave empty to just build)"
         required: false
         default: ""
 
@@ -21,41 +22,96 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  # Core logic tests + mutation check (injects known bugs and expects the tests to catch them).
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - run: dotnet test tests/SoundSplit.Tests
+      - run: python3 tools/mutation_check.py
+
+  windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.x"
 
-      - name: Build single-file SoundSplit.exe
+      # Also runs the Windows-only checks against the real per-app audio API.
+      - name: Test
+        run: dotnet test tests/SoundSplit.Tests
+
+      - name: Build SoundSplit.exe
         working-directory: SoundSplit
         run: >
           dotnet publish SoundSplit.csproj -c Release -r win-x64 --self-contained true
           -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
           -p:EnableCompressionInSingleFile=true -p:DebugType=none -o publish
 
-      - name: Upload build
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: SoundSplit-windows
           path: SoundSplit/publish/SoundSplit.exe
 
-      # Two ways to publish a GitHub Release with the .exe attached:
-      #  - push a tag like v1.0.2, or
-      #  - Actions tab -> "SoundSplit (Windows app)" -> Run workflow -> type a version.
-      - name: Publish release
-        if: startsWith(github.ref, 'refs/tags/v') || inputs.version != ''
-        uses: softprops/action-gh-release@v2
+  android:
+    runs-on: ubuntu-latest
+    env:
+      KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # Optional: sign with your own key (see README). Without it the APK uses a debug key.
+      - name: Decode signing key
+        if: env.KEYSTORE_B64 != ''
+        run: |
+          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
+          echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
+
+      - name: Build APK
+        working-directory: android
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          APP_VERSION: ${{ inputs.version || github.ref_name }}
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+          cp app/build/outputs/apk/release/app-release.apk SoundSplit-android.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SoundSplit-android
+          path: android/SoundSplit-android.apk
+
+  # Push a v* tag, or run this workflow with a version, to publish a release with both builds.
+  release:
+    needs: [tests, windows, android]
+    if: startsWith(github.ref, 'refs/tags/v') || inputs.version != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ inputs.version || github.ref_name }}
           name: SoundSplit ${{ inputs.version || github.ref_name }}
           target_commitish: ${{ github.sha }}
           make_latest: true
-          files: SoundSplit/publish/SoundSplit.exe
           generate_release_notes: true
+          files: |
+            dist/SoundSplit.exe
+            dist/SoundSplit-android.apk
           body: |
-            Download `SoundSplit.exe` below. Windows 10 1803+ / Windows 11, no install required.
-            The exe is unsigned; if SmartScreen appears, choose *More info → Run anyway*.
+            **Windows:** download `SoundSplit.exe` (Windows 10 1803+ / 11, no install). It's unsigned; if SmartScreen appears, choose *More info → Run anyway*.
+            **Android:** download `SoundSplit-android.apk` (Android 10+) and allow installing from your browser when asked.

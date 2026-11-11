@@ -62,16 +62,22 @@ namespace SoundSplit.Core
         [PreserveSig] int ClearAllPersistedApplicationDefaultEndpoints();
     }
 
+    /// <summary>What the router needs from Windows. Lets tests swap in a fake.</summary>
+    internal interface IEndpointPolicy
+    {
+        bool IsAvailable { get; }
+        bool SetAppOutput(int processId, string? mmDeviceId);
+        bool SetAppInput(int processId, string? mmDeviceId);
+        bool ClearAll();
+    }
+
     /// <summary>Friendly wrapper around Windows' per-app default audio device API.</summary>
-    internal sealed class AudioPolicyConfig
+    internal sealed class AudioPolicyConfig : IEndpointPolicy
     {
         private const string ClassName = "Windows.Media.Internal.AudioPolicyConfig";
-        private const string MmDevApiToken = @"\\?\SWD#MMDEVAPI#";
-        private const string RenderInterface = "#{e6327cad-dcec-4949-ae8a-991e976a79d2}";
-        private const string CaptureInterface = "#{2eef81be-33fa-4800-9670-1cd474972c3f}";
 
-        private readonly IAudioPolicyConfigFactory21H2? _new;
-        private readonly IAudioPolicyConfigFactoryDownlevel? _old;
+        private IAudioPolicyConfigFactory21H2? _new;
+        private IAudioPolicyConfigFactoryDownlevel? _old;
 
         public bool IsAvailable => _new != null || _old != null;
         public string? Error { get; }
@@ -88,14 +94,17 @@ namespace SoundSplit.Core
                 }
 
                 // Windows changed the interface ID over the years, and which build got which ID
-                // isn't documented. So ask for both and keep whichever one Windows hands back.
+                // isn't documented. So try every known ID and keep whichever one Windows accepts.
                 Exception? last = null;
-                try { _new = (IAudioPolicyConfigFactory21H2)Activate(typeof(IAudioPolicyConfigFactory21H2).GUID); }
-                catch (Exception ex) { last = ex; }
-
-                if (_new == null)
+                foreach (var iid in CandidateIids)
                 {
-                    try { _old = (IAudioPolicyConfigFactoryDownlevel)Activate(typeof(IAudioPolicyConfigFactoryDownlevel).GUID); }
+                    try
+                    {
+                        var obj = Activate(iid);
+                        if (iid == typeof(IAudioPolicyConfigFactory21H2).GUID) _new = (IAudioPolicyConfigFactory21H2)obj;
+                        else _old = (IAudioPolicyConfigFactoryDownlevel)obj;
+                        break;
+                    }
                     catch (Exception ex) { last = ex; }
                 }
 
@@ -107,6 +116,13 @@ namespace SoundSplit.Core
                 Error = "Windows refused the per-app audio API: " + ex.Message;
             }
         }
+
+        /// <summary>Every interface ID the factory has shipped with. All of them are tried, in this order.</summary>
+        internal static readonly Guid[] CandidateIids =
+        {
+            typeof(IAudioPolicyConfigFactory21H2).GUID,
+            typeof(IAudioPolicyConfigFactoryDownlevel).GUID,
+        };
 
         private static object Activate(Guid iid)
         {
@@ -141,7 +157,7 @@ namespace SoundSplit.Core
             {
                 if (!string.IsNullOrWhiteSpace(mmDeviceId))
                 {
-                    var full = MmDevApiToken + mmDeviceId + (flow == EDataFlow.Render ? RenderInterface : CaptureInterface);
+                    var full = EndpointIds.ToEndpointPath(mmDeviceId, flow == EDataFlow.Capture);
                     if (WindowsCreateString(full, (uint)full.Length, out hString) != 0) return false;
                 }
 
@@ -178,7 +194,7 @@ namespace SoundSplit.Core
                 try
                 {
                     var raw = Marshal.PtrToStringUni(WindowsGetStringRawBuffer(h, out var len), (int)len);
-                    return Unpack(raw);
+                    return EndpointIds.FromEndpointPath(raw);
                 }
                 finally { WindowsDeleteString(h); }
             }
@@ -195,16 +211,6 @@ namespace SoundSplit.Core
                                      : _old!.ClearAllPersistedApplicationDefaultEndpoints()) >= 0;
             }
             catch { return false; }
-        }
-
-        private static string? Unpack(string? full)
-        {
-            if (string.IsNullOrEmpty(full)) return null;
-            var s = full;
-            if (s.StartsWith(MmDevApiToken, StringComparison.OrdinalIgnoreCase)) s = s.Substring(MmDevApiToken.Length);
-            if (s.EndsWith(RenderInterface, StringComparison.OrdinalIgnoreCase)) s = s.Substring(0, s.Length - RenderInterface.Length);
-            if (s.EndsWith(CaptureInterface, StringComparison.OrdinalIgnoreCase)) s = s.Substring(0, s.Length - CaptureInterface.Length);
-            return s;
         }
 
         [DllImport("combase.dll")]

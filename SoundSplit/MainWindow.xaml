@@ -92,14 +92,30 @@
                             <local:IconBox Data="{StaticResource I.Sliders}" Width="16" Height="16" />
                         </Button>
                         <Button DockPanel.Dock="Right" Style="{StaticResource BtnChrome}" ToolTip="Help"
-                                Command="{Binding ShowTutorialCommand}" WindowChrome.IsHitTestVisibleInChrome="True">
+                                Command="{Binding ShowTutorialCommand}" WindowChrome.IsHitTestVisibleInChrome="True"
+                                Visibility="{Binding IsMinimal, Converter={StaticResource BoolToVis}, ConverterParameter=invert}">
                             <local:IconBox Data="{StaticResource I.Help}" Width="16" Height="16" />
                         </Button>
+                        <Button DockPanel.Dock="Right" Style="{StaticResource BtnChrome}" ToolTip="Minimal mode"
+                                Command="{Binding ToggleMinimalCommand}" WindowChrome.IsHitTestVisibleInChrome="True"
+                                Visibility="{Binding IsMinimal, Converter={StaticResource BoolToVis}, ConverterParameter=invert}">
+                            <local:IconBox Data="{StaticResource I.Shrink}" Width="15" Height="15" />
+                        </Button>
+                        <Button DockPanel.Dock="Right" Style="{StaticResource BtnChrome}" ToolTip="Full view"
+                                Command="{Binding ToggleMinimalCommand}" WindowChrome.IsHitTestVisibleInChrome="True"
+                                Visibility="{Binding IsMinimal, Converter={StaticResource BoolToVis}}">
+                            <local:IconBox Data="{StaticResource I.Expand}" Width="15" Height="15" />
+                        </Button>
+                        <ToggleButton DockPanel.Dock="Right" Style="{StaticResource Switch}" Margin="0,0,10,0"
+                                      IsChecked="{Binding IsEnabled, Mode=TwoWay}" IsEnabled="{Binding IsSupported}"
+                                      ToolTip="Routing on/off" WindowChrome.IsHitTestVisibleInChrome="True"
+                                      Visibility="{Binding IsMinimal, Converter={StaticResource BoolToVis}}" />
                     </DockPanel>
                 </Border>
 
                 <!-- ======================================================= Content -->
-                <Grid Grid.Row="1" Margin="20,4,20,20">
+                <Grid Grid.Row="1" Margin="20,4,20,20"
+                      Visibility="{Binding IsMinimal, Converter={StaticResource BoolToVis}, ConverterParameter=invert}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -369,14 +385,52 @@
                         </Grid>
                     </Grid>
                 </Grid>
+
+                <!-- ======================================================= Minimal mode -->
+                <ScrollViewer Grid.Row="1" Margin="8,0,8,8" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                              Visibility="{Binding IsMinimal, Converter={StaticResource BoolToVis}}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource Sub}" Margin="8,4,8,12" FontSize="12" TextAlignment="Center"
+                                   Text="Play something in an app and it will appear here."
+                                   Visibility="{Binding HasApps, Converter={StaticResource BoolToVis}, ConverterParameter=invert}" />
+                        <ItemsControl ItemsSource="{Binding Apps}" Focusable="False">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type vm:AppItem}">
+                                    <Grid Margin="8,0,8,6">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="20" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="170" />
+                                        </Grid.ColumnDefinitions>
+                                        <Image Source="{Binding Icon}" Width="18" Height="18" RenderOptions.BitmapScalingMode="HighQuality"
+                                               Visibility="{Binding HasIcon, Converter={StaticResource BoolToVis}}" />
+                                        <Border Width="18" Height="18" CornerRadius="5" Background="{DynamicResource Brush.IconTile}"
+                                                Visibility="{Binding HasIcon, Converter={StaticResource BoolToVis}, ConverterParameter=invert}">
+                                            <TextBlock Text="{Binding Initial}" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center" Foreground="{DynamicResource Brush.IconTileText}" />
+                                        </Border>
+                                        <TextBlock Grid.Column="1" Text="{Binding DisplayName}" Margin="10,0,8,0" VerticalAlignment="Center"
+                                                   FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis" />
+                                        <ComboBox Grid.Column="2" Style="{StaticResource Combo}" Height="30"
+                                                  ItemsSource="{Binding DataContext.OutputOptions, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                  ItemTemplate="{StaticResource DeviceOptionTemplate}"
+                                                  SelectedValuePath="Id" SelectedValue="{Binding OutputId, Mode=TwoWay}"
+                                                  AutomationProperties.Name="Output device" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
             </Grid>
 
             <!-- ======================================================= Settings -->
             <Grid Visibility="{Binding ShowSettings, Converter={StaticResource BoolToVis}}">
                 <Border Background="Transparent" MouseDown="OnBackdropClick" />
                 <ContentControl Style="{StaticResource ModalCard}" HorizontalAlignment="Right" VerticalAlignment="Top"
-                                Margin="0,50,12,0" Width="340" Padding="20">
-                    <StackPanel>
+                                Margin="0,50,12,12" Width="340" Padding="0">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Margin="20">
                         <TextBlock Style="{StaticResource SectionLabel}" Text="THEME" />
                         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                             <RadioButton Style="{StaticResource Swatch}" GroupName="Theme"
@@ -455,6 +509,13 @@
                                 <TextBlock Style="{StaticResource Sub}" FontSize="12" Text="Show an input device picker for each app." />
                             </StackPanel>
                         </DockPanel>
+                        <DockPanel Margin="0,12,0,0">
+                            <ToggleButton DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding IsMinimal, Mode=TwoWay}" />
+                            <StackPanel>
+                                <TextBlock Text="Minimal mode" FontWeight="SemiBold" />
+                                <TextBlock Style="{StaticResource Sub}" FontSize="12" Text="A small window with just apps and outputs." />
+                            </StackPanel>
+                        </DockPanel>
 
                         <Rectangle Height="1" Fill="{DynamicResource Brush.Divider}" Margin="0,16" />
 
@@ -470,13 +531,14 @@
                                        Text="{Binding Version, StringFormat='SoundSplit {0}'}" />
                         </DockPanel>
                     </StackPanel>
+                    </ScrollViewer>
                 </ContentControl>
             </Grid>
 
             <!-- ======================================================= Add app -->
             <Grid Visibility="{Binding ShowAddApp, Converter={StaticResource BoolToVis}}">
                 <Border Background="{DynamicResource Brush.Overlay}" MouseDown="OnBackdropClick" />
-                <ContentControl Style="{StaticResource ModalCard}" Width="600" MaxHeight="540" Margin="20" Padding="22">
+                <ContentControl Style="{StaticResource ModalCard}" MaxWidth="600" MaxHeight="540" Margin="16" Padding="22">
                     <DockPanel>
                         <DockPanel DockPanel.Dock="Top">
                             <Button DockPanel.Dock="Right" Style="{StaticResource BtnIcon}" VerticalAlignment="Top"
@@ -532,7 +594,7 @@
             <!-- ======================================================= Help / first run -->
             <Grid Visibility="{Binding ShowTutorial, Converter={StaticResource BoolToVis}}">
                 <Border Background="{DynamicResource Brush.Overlay}" MouseDown="OnBackdropClick" />
-                <ContentControl Style="{StaticResource ModalCard}" Width="460" Margin="20" Padding="28,26">
+                <ContentControl Style="{StaticResource ModalCard}" MaxWidth="460" Margin="16" Padding="28,26">
                     <StackPanel>
                         <Image Source="pack://application:,,,/Assets/logo.png" Width="52" Height="52" RenderOptions.BitmapScalingMode="HighQuality" />
                         <TextBlock Style="{StaticResource H2}" FontSize="18" Text="Welcome to SoundSplit" HorizontalAlignment="Center" Margin="0,12,0,0" />
@@ -576,7 +638,7 @@
             <!-- ======================================================= Reset confirm -->
             <Grid Visibility="{Binding ShowResetConfirm, Converter={StaticResource BoolToVis}}">
                 <Border Background="{DynamicResource Brush.Overlay}" MouseDown="OnBackdropClick" />
-                <ContentControl Style="{StaticResource ModalCard}" Width="400" Padding="24">
+                <ContentControl Style="{StaticResource ModalCard}" MaxWidth="400" Margin="16" Padding="24">
                     <StackPanel>
                         <TextBlock Style="{StaticResource H2}" FontSize="17" Text="Reset all routing?" />
                         <TextBlock Style="{StaticResource Sub}" Margin="0,6,0,0"
