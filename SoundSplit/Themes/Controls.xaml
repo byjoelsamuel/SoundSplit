@@ -6,16 +6,41 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:SoundSplit">
 
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Icons.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
     <local:BoolToVisibility x:Key="BoolToVis" />
     <local:TextToVisibility x:Key="TextToVis" />
     <local:EqualsToBool x:Key="EqualsToBool" />
     <local:CountToVisibility x:Key="CountToVis" />
 
-    <FontFamily x:Key="Font.Icons">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
+    <!-- ============================================================ Icons -->
+    <Style TargetType="local:IconBox">
+        <Setter Property="Width" Value="16" />
+        <Setter Property="Height" Value="16" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="IsHitTestVisible" Value="False" />
+        <Setter Property="SnapsToDevicePixels" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:IconBox">
+                    <Viewbox Stretch="Uniform">
+                        <Canvas Width="24" Height="24">
+                            <Path Data="{TemplateBinding Data}" Fill="{TemplateBinding Fill}"
+                                  Stroke="{TemplateBinding Foreground}" StrokeThickness="{TemplateBinding StrokeThickness}"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                        </Canvas>
+                    </Viewbox>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
     <!-- ============================================================ Cards -->
     <Style x:Key="Card" TargetType="ContentControl">
-        <Setter Property="Padding" Value="18" />
+        <Setter Property="Padding" Value="20" />
         <Setter Property="Focusable" Value="False" />
         <Setter Property="Background" Value="{DynamicResource Brush.Card}" />
         <Setter Property="Template">
@@ -51,7 +76,7 @@
     <Style x:Key="H1" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{DynamicResource Font.Title}" />
         <Setter Property="FontWeight" Value="ExtraBold" />
-        <Setter Property="FontSize" Value="22" />
+        <Setter Property="FontSize" Value="20" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.Text}" />
     </Style>
     <Style x:Key="H2" TargetType="TextBlock" BasedOn="{StaticResource H1}">
@@ -60,20 +85,15 @@
     </Style>
     <Style x:Key="Sub" TargetType="TextBlock">
         <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="LineHeight" Value="18" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.SubText}" />
         <Setter Property="TextWrapping" Value="Wrap" />
-    </Style>
-    <Style x:Key="Glyph" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource Font.Icons}" />
-        <Setter Property="FontSize" Value="16" />
-        <Setter Property="HorizontalAlignment" Value="Center" />
-        <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 
     <Style x:Key="Chip" TargetType="Border">
         <Setter Property="Background" Value="{DynamicResource Brush.Chip}" />
         <Setter Property="CornerRadius" Value="{DynamicResource Radius.Button}" />
-        <Setter Property="Padding" Value="9,2" />
+        <Setter Property="Padding" Value="8,2" />
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 
@@ -82,10 +102,10 @@
         <Setter Property="Background" Value="{DynamicResource Brush.Button}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Brush.ButtonBorder}" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.ButtonText}" />
-        <Setter Property="BorderThickness" Value="1.5" />
-        <Setter Property="Padding" Value="16,0" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="14,0" />
         <Setter Property="MinHeight" Value="34" />
-        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="FontSize" Value="13" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
@@ -110,7 +130,7 @@
                                 Background="{DynamicResource Brush.HoverOverlay}" IsHitTestVisible="False" />
                         <ContentPresenter Margin="{TemplateBinding Padding}"
                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                          RecognizesAccessKey="True" />
+                                          RecognizesAccessKey="True" TextElement.Foreground="{TemplateBinding Foreground}" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -144,36 +164,28 @@
         <Setter Property="Foreground" Value="{DynamicResource Brush.DangerText}" />
     </Style>
 
-    <!-- Round bubble button for a single icon -->
+    <!-- Borderless round icon button (bell, mute, remove…) -->
     <Style x:Key="BtnIcon" TargetType="ButtonBase">
-        <Setter Property="Width" Value="36" />
-        <Setter Property="Height" Value="36" />
-        <Setter Property="Background" Value="{DynamicResource Brush.Button}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource Brush.ButtonBorder}" />
-        <Setter Property="Foreground" Value="{DynamicResource Brush.ButtonText}" />
-        <Setter Property="FontFamily" Value="{StaticResource Font.Icons}" />
-        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Width" Value="32" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.SubText}" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ButtonBase">
-                    <Grid>
-                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="1.5" CornerRadius="{DynamicResource Radius.Round}" />
-                        <Border Margin="3,2,3,0" VerticalAlignment="Top" Height="14"
-                                CornerRadius="{DynamicResource Radius.Round}"
-                                Background="{DynamicResource Brush.Gloss}" IsHitTestVisible="False" />
+                    <Grid Background="Transparent">
                         <Border x:Name="Hover" Opacity="0" CornerRadius="{DynamicResource Radius.Round}"
-                                Background="{DynamicResource Brush.HoverOverlay}" IsHitTestVisible="False" />
+                                Background="{DynamicResource Brush.ItemHover}" />
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Hover" Property="Opacity" Value="1" />
+                            <Setter Property="Foreground" Value="{DynamicResource Brush.Text}" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter Property="Opacity" Value="0.8" />
+                            <Setter Property="Opacity" Value="0.75" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -183,21 +195,18 @@
 
     <!-- Title bar buttons (minimise / close etc.) -->
     <Style x:Key="BtnChrome" TargetType="Button">
-        <Setter Property="Width" Value="34" />
-        <Setter Property="Height" Value="34" />
-        <Setter Property="Margin" Value="4,0,0,0" />
+        <Setter Property="Width" Value="32" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="Margin" Value="2,0,0,0" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.TitleText}" />
-        <Setter Property="FontFamily" Value="{StaticResource Font.Icons}" />
-        <Setter Property="FontSize" Value="12" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Grid Background="Transparent">
-                        <Border x:Name="Bg" Opacity="0" CornerRadius="{DynamicResource Radius.Round}"
-                                Background="{DynamicResource Brush.HoverOverlay}"
-                                BorderBrush="{DynamicResource Brush.CardBorder}" BorderThickness="1" />
+                        <Border x:Name="Bg" Opacity="0" CornerRadius="{DynamicResource Radius.Button}"
+                                Background="{DynamicResource Brush.HoverOverlay}" />
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Grid>
                     <ControlTemplate.Triggers>
@@ -227,7 +236,7 @@
                 <ControlTemplate TargetType="Button">
                     <Grid>
                         <Border x:Name="Bd" Background="{DynamicResource Brush.Field}"
-                                BorderBrush="{DynamicResource Brush.FieldBorder}" BorderThickness="1.5"
+                                BorderBrush="{DynamicResource Brush.CardBorder}" BorderThickness="1"
                                 CornerRadius="{DynamicResource Radius.Tile}" />
                         <Border x:Name="Hover" Opacity="0" CornerRadius="{DynamicResource Radius.Tile}"
                                 Background="{DynamicResource Brush.ItemHover}" />
@@ -247,22 +256,20 @@
     <Style x:Key="Switch" TargetType="ToggleButton">
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-        <Setter Property="Width" Value="52" />
-        <Setter Property="Height" Value="28" />
+        <Setter Property="Width" Value="44" />
+        <Setter Property="Height" Value="24" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToggleButton">
                     <Grid>
                         <Border x:Name="Track" CornerRadius="{DynamicResource Radius.Switch}"
-                                Background="{DynamicResource Brush.SwitchOff}"
-                                BorderBrush="{DynamicResource Brush.ButtonBorder}" BorderThickness="1" />
-                        <Border Margin="3,2,3,0" VerticalAlignment="Top" Height="10"
+                                Background="{DynamicResource Brush.SwitchOff}" />
+                        <Border Margin="3,2,3,0" VerticalAlignment="Top" Height="8"
                                 CornerRadius="{DynamicResource Radius.Switch}"
                                 Background="{DynamicResource Brush.Gloss}" IsHitTestVisible="False" Opacity="0.7" />
-                        <Border x:Name="Thumb" Width="22" Height="22" Margin="3,0" HorizontalAlignment="Left"
+                        <Border x:Name="Thumb" Width="18" Height="18" Margin="3,0" HorizontalAlignment="Left"
                                 CornerRadius="{DynamicResource Radius.Thumb}"
-                                Background="{DynamicResource Brush.Thumb}"
-                                BorderBrush="{DynamicResource Brush.ButtonBorder}" BorderThickness="1">
+                                Background="{DynamicResource Brush.Thumb}">
                             <Border.RenderTransform>
                                 <TranslateTransform X="0" />
                             </Border.RenderTransform>
@@ -279,7 +286,7 @@
                                     <Storyboard>
                                         <DoubleAnimation Storyboard.TargetName="Thumb"
                                                          Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
-                                                         To="24" Duration="0:0:0.15" />
+                                                         To="20" Duration="0:0:0.15" />
                                     </Storyboard>
                                 </BeginStoryboard>
                             </Trigger.EnterActions>
@@ -311,17 +318,9 @@
             <Setter.Value>
                 <ControlTemplate TargetType="RadioButton">
                     <StackPanel Background="Transparent">
-                        <Grid Width="54" Height="54" HorizontalAlignment="Center">
-                            <Ellipse x:Name="Ring" Stroke="{DynamicResource Brush.Accent}" StrokeThickness="3" Opacity="0" />
-                            <Ellipse Margin="5" Fill="{TemplateBinding Background}" Stroke="#40000000" StrokeThickness="1" />
-                            <Ellipse Margin="9,7,9,26" IsHitTestVisible="False">
-                                <Ellipse.Fill>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                        <GradientStop Color="#99FFFFFF" Offset="0" />
-                                        <GradientStop Color="#00FFFFFF" Offset="1" />
-                                    </LinearGradientBrush>
-                                </Ellipse.Fill>
-                            </Ellipse>
+                        <Grid Width="48" Height="48" HorizontalAlignment="Center">
+                            <Ellipse x:Name="Ring" Stroke="{DynamicResource Brush.Accent}" StrokeThickness="2" Opacity="0" />
+                            <Ellipse Margin="5" Fill="{TemplateBinding Background}" Stroke="#26000000" StrokeThickness="1" />
                         </Grid>
                         <ContentPresenter HorizontalAlignment="Center" Margin="0,4,0,0" />
                     </StackPanel>
@@ -342,7 +341,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="RepeatButton">
-                    <Border Height="6" CornerRadius="3" Background="{DynamicResource Brush.TrackFill}" />
+                    <Border Height="4" CornerRadius="2" Background="{DynamicResource Brush.TrackFill}" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -362,9 +361,9 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Thumb">
-                    <Border Width="18" Height="18" CornerRadius="{DynamicResource Radius.Thumb}"
+                    <Border Width="14" Height="14" CornerRadius="{DynamicResource Radius.Thumb}"
                             Background="{DynamicResource Brush.Thumb}"
-                            BorderBrush="{DynamicResource Brush.ButtonBorder}" BorderThickness="1.5">
+                            BorderBrush="{DynamicResource Brush.TrackFill}" BorderThickness="2">
                         <Border.Effect>
                             <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.3" />
                         </Border.Effect>
@@ -385,7 +384,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Slider">
                     <Grid Height="22" Background="Transparent">
-                        <Border Height="6" CornerRadius="3" VerticalAlignment="Center" Background="{DynamicResource Brush.Track}" />
+                        <Border Height="4" CornerRadius="2" VerticalAlignment="Center" Background="{DynamicResource Brush.Track}" />
                         <Track x:Name="PART_Track">
                             <Track.DecreaseRepeatButton>
                                 <RepeatButton Command="Slider.DecreaseLarge" Style="{StaticResource SliderFill}" />
@@ -405,7 +404,7 @@
 
     <!-- ============================================================ Dropdown -->
     <Style x:Key="ComboItem" TargetType="ComboBoxItem">
-        <Setter Property="Padding" Value="10,7" />
+        <Setter Property="Padding" Value="9,7" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.Text}" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
@@ -438,13 +437,13 @@
                 <ControlTemplate TargetType="ToggleButton">
                     <Grid>
                         <Border x:Name="Bd" Background="{DynamicResource Brush.Field}"
-                                BorderBrush="{DynamicResource Brush.FieldBorder}" BorderThickness="1.5"
+                                BorderBrush="{DynamicResource Brush.FieldBorder}" BorderThickness="1"
                                 CornerRadius="{DynamicResource Radius.Button}" />
                         <Border x:Name="Hover" Opacity="0" CornerRadius="{DynamicResource Radius.Button}"
                                 Background="{DynamicResource Brush.ItemHover}" />
-                        <TextBlock Text="&#xE70D;" Style="{StaticResource Glyph}" FontSize="10"
-                                   HorizontalAlignment="Right" Margin="0,0,13,0"
-                                   Foreground="{DynamicResource Brush.SubText}" />
+                        <local:IconBox Data="{StaticResource I.ChevronDown}" Width="14" Height="14"
+                                       HorizontalAlignment="Right" Margin="0,0,11,0"
+                                       Foreground="{DynamicResource Brush.SubText}" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -457,7 +456,7 @@
     </Style>
 
     <Style x:Key="Combo" TargetType="ComboBox">
-        <Setter Property="Height" Value="36" />
+        <Setter Property="Height" Value="34" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.Text}" />
         <Setter Property="ItemContainerStyle" Value="{StaticResource ComboItem}" />
         <Setter Property="MaxDropDownHeight" Value="320" />
@@ -469,7 +468,7 @@
                     <Grid>
                         <ToggleButton Style="{StaticResource ComboToggle}"
                                       IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
-                        <ContentPresenter Margin="14,0,34,0" VerticalAlignment="Center" IsHitTestVisible="False"
+                        <ContentPresenter Margin="11,0,32,0" VerticalAlignment="Center" IsHitTestVisible="False"
                                           Content="{TemplateBinding SelectionBoxItem}"
                                           ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                                           ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" />
@@ -477,7 +476,7 @@
                                PopupAnimation="Fade" VerticalOffset="4"
                                IsOpen="{TemplateBinding IsDropDownOpen}">
                             <Border Background="{DynamicResource Brush.Popup}" BorderBrush="{DynamicResource Brush.PopupBorder}"
-                                    BorderThickness="1.5" CornerRadius="{DynamicResource Radius.Tile}" Padding="5"
+                                    BorderThickness="1" CornerRadius="{DynamicResource Radius.Tile}" Padding="4"
                                     Margin="0,0,8,10"
                                     MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
                                     MaxHeight="{TemplateBinding MaxDropDownHeight}"

@@ -66,7 +66,7 @@ namespace SoundSplit
         {
             var menu = new WinForms.ContextMenuStrip();
             menu.Items.Add("Open SoundSplit", null, (_, _) => ShowMain());
-            _trayToggle = new WinForms.ToolStripMenuItem("Separate app sound: on");
+            _trayToggle = new WinForms.ToolStripMenuItem("Routing: on");
             _trayToggle.Click += (_, _) => { if (_vm != null) _vm.IsEnabled = !_vm.IsEnabled; };
             menu.Items.Add(_trayToggle);
             menu.Items.Add(new WinForms.ToolStripSeparator());
@@ -101,7 +101,7 @@ namespace SoundSplit
         private void UpdateTray()
         {
             if (_vm == null || _tray == null || _trayToggle == null) return;
-            _trayToggle.Text = _vm.IsEnabled ? "Turn off (all apps follow Windows)" : "Turn on";
+            _trayToggle.Text = _vm.IsEnabled ? "Turn routing off" : "Turn routing on";
             _trayToggle.Checked = _vm.IsEnabled;
             _tray.Text = _vm.IsEnabled ? "SoundSplit: on" : "SoundSplit: off";
         }
@@ -109,7 +109,7 @@ namespace SoundSplit
         internal void ShowTrayHint()
         {
             _tray?.ShowBalloonTip(3000, "SoundSplit is still running",
-                "Your app sound choices stay active. Click the icon by the clock to open it again, or right-click to quit.",
+                "Routing stays active. Click the tray icon to reopen, or right-click to quit.",
                 WinForms.ToolTipIcon.Info);
         }
 
@@ -150,7 +150,7 @@ namespace SoundSplit
                 File.AppendAllText(Path.Combine(dir, "error.log"), $"[{DateTime.Now:u}] {e.Exception}\n\n");
             }
             catch { }
-            _vm?.Toast("Oops, something hiccuped. It's been logged and SoundSplit kept running.");
+            _vm?.Toast("Something went wrong. Details were written to error.log.");
             e.Handled = true;
         }
     }

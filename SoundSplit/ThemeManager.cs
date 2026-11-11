@@ -7,11 +7,11 @@ namespace SoundSplit
     /// <summary>Swaps the colour/shape palette at runtime. Every control uses DynamicResource, so it updates live.</summary>
     internal static class ThemeManager
     {
-        public static readonly string[] Names = { "Aero", "Classic", "Midnight" };
+        public static readonly string[] Names = { "Light", "Midnight", "Aero", "Classic" };
 
         public static void Apply(string name)
         {
-            if (!Names.Contains(name)) name = "Aero";
+            if (!Names.Contains(name)) name = "Light";
             var dict = new ResourceDictionary
             {
                 Source = new Uri($"/SoundSplit;component/Themes/{name}.xaml", UriKind.Relative)

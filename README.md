@@ -6,6 +6,15 @@ Per-app audio output for Windows 10/11. Route any app to its own speaker or head
 
 **[Download the latest release](https://github.com/byjoelsamuel/md-player/releases/latest)**
 
+![SoundSplit](docs/screenshot-light.png)
+
+<details>
+<summary>Dark theme</summary>
+
+![SoundSplit dark theme](docs/screenshot-dark.png)
+
+</details>
+
 ## Features
 
 - Pick an output device (and optionally a mic) for each app
@@ -13,16 +22,16 @@ Per-app audio output for Windows 10/11. Route any app to its own speaker or head
 - Per-app volume and mute
 - Test chime to identify devices
 - Tray icon, start with Windows
-- Themes: Aero, Classic 98, Midnight
+- Themes: Light, Midnight, Aero, Classic 98
 
 Routing is handled by Windows itself (the same mechanism as *Settings → Sound → Volume mixer*), so no drivers or virtual cables are needed and no latency is added.
 
 ## Usage
 
 1. Run `SoundSplit.exe`. It's unsigned, so SmartScreen may ask: *More info → Run anyway*.
-2. Make sure **Turn on now** is enabled.
-3. Play audio in an app, or add it with **Add an app**.
-4. Choose a device from the app's **Play on** dropdown.
+2. Make sure routing is switched on (top right).
+3. Play audio in an app, or add it with **Add app**.
+4. Choose a device from the app's output dropdown.
 
 If an app doesn't switch immediately, pause and resume playback. Some apps need a restart.
 

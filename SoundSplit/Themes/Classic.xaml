@@ -28,6 +28,9 @@
     <SolidColorBrush x:Key="Brush.CardShine" Color="#00FFFFFF" />
     <SolidColorBrush x:Key="Brush.Hero" Color="#FFC0C0C0" />
 
+    <SolidColorBrush x:Key="Brush.Divider" Color="#FF808080" />
+    <SolidColorBrush x:Key="Brush.RowHover" Color="#FFD4D0C8" />
+
     <SolidColorBrush x:Key="Brush.Text" Color="#FF000000" />
     <SolidColorBrush x:Key="Brush.SubText" Color="#FF3C3C3C" />
 

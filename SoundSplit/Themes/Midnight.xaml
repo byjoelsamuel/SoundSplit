@@ -5,10 +5,10 @@
     <FontFamily x:Key="Font.Main">pack://application:,,,/Assets/Fonts/#Nunito</FontFamily>
     <FontFamily x:Key="Font.Title">pack://application:,,,/Assets/Fonts/#Nunito</FontFamily>
 
-    <CornerRadius x:Key="Radius.Card">18</CornerRadius>
-    <CornerRadius x:Key="Radius.Tile">14</CornerRadius>
-    <CornerRadius x:Key="Radius.Button">17</CornerRadius>
-    <CornerRadius x:Key="Radius.Round">20</CornerRadius>
+    <CornerRadius x:Key="Radius.Card">12</CornerRadius>
+    <CornerRadius x:Key="Radius.Tile">8</CornerRadius>
+    <CornerRadius x:Key="Radius.Button">8</CornerRadius>
+    <CornerRadius x:Key="Radius.Round">16</CornerRadius>
     <CornerRadius x:Key="Radius.Switch">14</CornerRadius>
     <CornerRadius x:Key="Radius.Thumb">11</CornerRadius>
     <Thickness x:Key="Thickness.Border">1</Thickness>
@@ -26,6 +26,9 @@
         <GradientStop Color="#FF2E3036" Offset="0" />
         <GradientStop Color="#FF2A2D45" Offset="1" />
     </LinearGradientBrush>
+
+    <SolidColorBrush x:Key="Brush.Divider" Color="#FF35373C" />
+    <SolidColorBrush x:Key="Brush.RowHover" Color="#FF2E3035" />
 
     <SolidColorBrush x:Key="Brush.Text" Color="#FFF2F3F5" />
     <SolidColorBrush x:Key="Brush.SubText" Color="#FFB5BAC1" />
@@ -58,8 +61,8 @@
     <SolidColorBrush x:Key="Brush.ChipText" Color="#FF57F287" />
     <SolidColorBrush x:Key="Brush.Good" Color="#FF23A55A" />
 
-    <SolidColorBrush x:Key="Brush.IconTile" Color="#FF5865F2" />
-    <SolidColorBrush x:Key="Brush.IconTileText" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="Brush.IconTile" Color="#335865F2" />
+    <SolidColorBrush x:Key="Brush.IconTileText" Color="#FFA5ADFF" />
 
     <SolidColorBrush x:Key="Brush.Danger" Color="#FFDA373C" />
     <SolidColorBrush x:Key="Brush.DangerText" Color="#FFFFFFFF" />
