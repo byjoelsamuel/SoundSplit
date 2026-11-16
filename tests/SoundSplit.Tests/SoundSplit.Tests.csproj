@@ -18,6 +18,7 @@
     <Compile Include="..\..\SoundSplit\Core\AudioPolicyConfig.cs" Link="Linked\AudioPolicyConfig.cs" />
     <Compile Include="..\..\SoundSplit\Core\Router.cs" Link="Linked\Router.cs" />
     <Compile Include="..\..\SoundSplit\Core\Settings.cs" Link="Linked\Settings.cs" />
+    <Compile Include="..\..\SoundSplit\Core\UpdateVersion.cs" Link="Linked\UpdateVersion.cs" />
   </ItemGroup>
 
   <ItemGroup>

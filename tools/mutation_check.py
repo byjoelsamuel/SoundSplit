@@ -15,6 +15,8 @@ mutants = [
  ("refused call marked as applied", "SoundSplit/Core/Router.cs", "if (ok) _applied[key] = deviceId;", "_applied[key] = deviceId;"),
  ("dead pid gets reset", "SoundSplit/Core/Router.cs", "if (_isAlive(key.Pid))", "if (true)"),
  ("unplugged device still routed", "SoundSplit/Core/Router.cs", "var useOut = !string.IsNullOrEmpty(outId) && activeOutputs.Contains(outId);", "var useOut = !string.IsNullOrEmpty(outId);"),
+ ("update check compares versions as text", "SoundSplit/Core/UpdateVersion.cs", "            if (a == null || b == null) return false;", "            if (a == null || b == null) return false;\n            return string.CompareOrdinal(Clean(candidate), Clean(current)) > 0;"),
+ ("same version offered as an update", "SoundSplit/Core/UpdateVersion.cs", "if (x != y) return x > y;", "if (x != y) return x >= y;\n            }\n            return true;\n            for (var j = 0; j < 0; j++) {"),
  ("case-insensitive rule lookup lost on load", "SoundSplit/Core/Settings.cs", "s.Rules = new Dictionary<string, RouteRule>(s.Rules ?? new(), StringComparer.OrdinalIgnoreCase);", "s.Rules ??= new();"),
 ]
 env=dict(os.environ, DOTNET_CLI_TELEMETRY_OPTOUT='1', DOTNET_NOLOGO='1')

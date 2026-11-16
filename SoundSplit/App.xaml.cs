@@ -54,6 +54,7 @@ namespace SoundSplit
 
             _vm = new MainViewModel(settings, demo);
             _vm.EnabledChanged += (_, _) => UpdateTray();
+            _vm.ExitRequested += (_, _) => ExitApp();
             _window = new global::SoundSplit.MainWindow(_vm, this);
             MainWindow = _window;
             CreateTray();
