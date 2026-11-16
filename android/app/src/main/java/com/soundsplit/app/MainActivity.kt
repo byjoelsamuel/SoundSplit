@@ -2,6 +2,10 @@ package com.soundsplit.app
 
 import android.Manifest
 import android.app.Activity
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
+import android.net.Uri
+import android.provider.Settings
 import android.content.Intent
 import android.graphics.Bitmap
 import android.media.AudioDeviceCallback
@@ -38,7 +42,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -56,6 +63,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -76,6 +84,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
 private val Bg = Color(0xFFF4F5F7)
@@ -94,6 +103,14 @@ private val Nunito = FontFamily(
 )
 
 class MainActivity : ComponentActivity() {
+
+    companion object {
+        const val EXTRA_TAB = "tab"
+        const val TAB_SPLIT = 0
+        const val TAB_WIDGET = 1
+    }
+
+    private val tab = mutableStateOf(TAB_SPLIT)
 
     private val captureConsent = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
         val data = r.data
@@ -116,12 +133,18 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         RouteService.restoreIfNeeded(this)
+        tab.value = intent.getIntExtra(EXTRA_TAB, TAB_SPLIT)
         setContent {
             MaterialTheme(
                 colorScheme = lightColorScheme(primary = Accent, background = Bg, surface = Card, onSurface = Ink),
                 typography = Typography(bodyLarge = TextStyle(fontFamily = Nunito, fontSize = 15.sp)),
-            ) { Screen(onStart = ::start, onStop = { RouteService.stop(this) }) }
+            ) { App(tab.value, onTab = { tab.value = it }, onStart = ::start, onStop = { RouteService.stop(this) }) }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        if (intent.hasExtra(EXTRA_TAB)) tab.value = intent.getIntExtra(EXTRA_TAB, TAB_SPLIT)
     }
 
     private fun start() {
@@ -129,6 +152,249 @@ class MainActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= 33) perms += Manifest.permission.POST_NOTIFICATIONS
         permissions.launch(perms.toTypedArray())
     }
+}
+
+@Composable
+private fun App(tab: Int, onTab: (Int) -> Unit, onStart: () -> Unit, onStop: () -> Unit) {
+    val context = LocalContext.current
+    var release by remember { mutableStateOf<Updater.Release?>(null) }
+    var showUpdate by remember { mutableStateOf(false) }
+    var downloadId by remember { mutableLongStateOf(-1L) }
+    var download by remember { mutableStateOf<Updater.Download?>(null) }
+
+    // Check GitHub once per launch; pop up if a newer version exists.
+    LaunchedEffect(Unit) {
+        release = Updater.check(BuildConfig.VERSION_NAME)
+        if (release != null) showUpdate = true
+    }
+    LaunchedEffect(downloadId) {
+        if (downloadId < 0) return@LaunchedEffect
+        while (true) {
+            val d = Updater.progress(context, downloadId)
+            download = d
+            if (d is Updater.Download.Done) { Updater.install(context, downloadId); break }
+            if (d is Updater.Download.Failed) break
+            delay(400)
+        }
+    }
+
+    Column(Modifier.fillMaxSize().background(Bg).statusBarsPadding().navigationBarsPadding()) {
+        Row(Modifier.padding(start = 20.dp, end = 20.dp, top = 20.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                Modifier.size(38.dp).clip(RoundedCornerShape(11.dp)).background(Color.White)
+                    .border(BorderStroke(2.dp, Ink), RoundedCornerShape(11.dp)),
+                contentAlignment = Alignment.Center,
+            ) { Image(painterResource(R.drawable.ic_glyph), null, Modifier.size(30.dp)) }
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Label("SoundSplit", 20.sp, FontWeight.Bold)
+                Label(if (tab == MainActivity.TAB_WIDGET) "Now-playing widget" else "Play chosen apps on another output", 13.sp, color = Muted)
+            }
+            if (release != null && !showUpdate) {
+                Box(
+                    Modifier.clip(CircleShape).background(AccentSoft).clickable { showUpdate = true }
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                ) { Label("Update", 12.sp, FontWeight.Bold, Accent) }
+            }
+        }
+
+        // Tabs
+        Row(
+            Modifier.padding(20.dp).fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Line).padding(3.dp),
+        ) {
+            listOf("Split" to MainActivity.TAB_SPLIT, "Widget" to MainActivity.TAB_WIDGET).forEach { (name, id) ->
+                val on = tab == id
+                Box(
+                    Modifier.weight(1f).clip(RoundedCornerShape(10.dp)).background(if (on) Card else Line)
+                        .clickable { onTab(id) }.padding(vertical = 9.dp),
+                    contentAlignment = Alignment.Center,
+                ) { Label(name, 14.sp, FontWeight.Bold, if (on) Ink else Muted) }
+            }
+        }
+
+        if (tab == MainActivity.TAB_WIDGET) WidgetScreen() else Screen(onStart, onStop)
+    }
+
+    val r = release
+    if (showUpdate && r != null) {
+        val d = download
+        AlertDialog(
+            onDismissRequest = { if (d !is Updater.Download.Running) showUpdate = false },
+            title = { Label("Update available", 18.sp, FontWeight.Bold) },
+            text = {
+                Column {
+                    Label("SoundSplit ${r.version} is ready. You have ${BuildConfig.VERSION_NAME}.", 14.sp)
+                    when (d) {
+                        is Updater.Download.Running -> {
+                            Spacer(Modifier.height(14.dp))
+                            LinearProgressIndicator(progress = { d.fraction }, modifier = Modifier.fillMaxWidth(), color = Accent)
+                            Spacer(Modifier.height(6.dp))
+                            Label("Downloading… ${(d.fraction * 100).toInt()}%", 12.sp, color = Muted)
+                        }
+                        Updater.Download.Done -> {
+                            Spacer(Modifier.height(10.dp))
+                            Label("Downloaded. If Android asks, allow SoundSplit to install apps, then press Install again.", 12.sp, color = Muted)
+                        }
+                        Updater.Download.Failed -> {
+                            Spacer(Modifier.height(10.dp))
+                            Label("Download failed. Check your connection and try again.", 12.sp, color = Danger)
+                        }
+                        null -> {}
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = d !is Updater.Download.Running,
+                    onClick = {
+                        if (d == Updater.Download.Done) Updater.install(context, downloadId)
+                        else { download = Updater.Download.Running(0f); downloadId = Updater.startDownload(context, r) }
+                    },
+                ) { Label(if (d == Updater.Download.Done) "Install" else "Update", 14.sp, FontWeight.Bold, Accent) }
+            },
+            dismissButton = {
+                if (d !is Updater.Download.Running)
+                    TextButton(onClick = { showUpdate = false }) { Label("Later", 14.sp, FontWeight.SemiBold, Muted) }
+            },
+            containerColor = Card,
+        )
+    }
+}
+
+@Composable
+private fun WidgetScreen() {
+    val context = LocalContext.current
+    val track by MediaListener.track.collectAsState()
+    var enabled by remember { mutableStateOf(MediaListener.isEnabled(context)) }
+    // Re-check when the user comes back from the settings screen.
+    LaunchedEffect(Unit) { while (true) { enabled = MediaListener.isEnabled(context); delay(1000) } }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        item {
+            Panel {
+                Label("Now-playing widget", 16.sp, FontWeight.Bold)
+                Label("A 3×3 home-screen widget with cover art and controls for whatever is playing: YouTube Music in Brave, Spotify, YouTube Music, podcasts, anything.", 13.sp, color = Muted)
+            }
+        }
+
+        item {
+            Panel {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Label("1. Allow media access", 14.sp, FontWeight.Bold)
+                        Label(if (enabled) "On" else "Needed to see what's playing in other apps. SoundSplit only reads the song info; it doesn't read your notifications.", 12.sp, color = if (enabled) Accent else Muted)
+                    }
+                    if (!enabled) {
+                        Spacer(Modifier.width(10.dp))
+                        SmallButton("Allow") { openListenerSettings(context) }
+                    }
+                }
+                if (!enabled) {
+                    Spacer(Modifier.height(8.dp))
+                    Label("Android says \"Restricted setting\"? Open App info → ⋮ (top right) → Allow restricted settings, then tap Allow again.", 12.sp, color = Muted)
+                    Spacer(Modifier.height(6.dp))
+                    SmallButton("App info") {
+                        context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}")))
+                    }
+                }
+            }
+        }
+
+        item {
+            Panel {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Label("2. Add it to your home screen", 14.sp, FontWeight.Bold)
+                        Label("Or long-press your home screen → Widgets → SoundSplit.", 12.sp, color = Muted)
+                    }
+                    Spacer(Modifier.width(10.dp))
+                    SmallButton("Add") {
+                        val mgr = AppWidgetManager.getInstance(context)
+                        val ok = mgr.isRequestPinAppWidgetSupported &&
+                            mgr.requestPinAppWidget(ComponentName(context, NowPlayingWidget::class.java), null, null)
+                        if (!ok) Toast.makeText(context, "Long-press your home screen → Widgets → SoundSplit", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }
+
+        item {
+            Label("Preview", 14.sp, FontWeight.Bold, modifier = Modifier.padding(top = 6.dp))
+        }
+        item { WidgetPreview(track, enabled) }
+    }
+}
+
+/** The same card as the home-screen widget, live and tappable. */
+@Composable
+private fun WidgetPreview(track: Track?, enabled: Boolean) {
+    val controls = MediaListener.controller?.transportControls
+    Column(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp))
+            .background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(Color(0xE6262A4A), Color(0xF2151726))))
+            .padding(14.dp),
+    ) {
+        Box(
+            Modifier.fillMaxWidth().height(180.dp).clip(RoundedCornerShape(18.dp))
+                .background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFF4F46E5), Color(0xFF06B6D4)))),
+            contentAlignment = Alignment.Center,
+        ) {
+            val art = track?.art
+            if (art != null) Image(art.asImageBitmap(), null, Modifier.fillMaxSize(), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
+            else Image(painterResource(R.drawable.ic_music_note), null, Modifier.size(48.dp))
+        }
+        Spacer(Modifier.height(10.dp))
+        Label(track?.title ?: if (enabled) "Nothing playing" else "Set up widget", 15.sp, FontWeight.Bold, Color.White)
+        Label(track?.artist ?: if (enabled) "Play something in any app" else "Allow media access above", 12.sp, color = Color(0xB3FFFFFF))
+        Spacer(Modifier.height(8.dp))
+        val frac = if (track != null && track.durationMs > 0) track.positionMs.toFloat() / track.durationMs else 0f
+        LinearProgressIndicator(progress = { frac }, modifier = Modifier.fillMaxWidth().height(4.dp).clip(CircleShape),
+            color = Color.White, trackColor = Color(0x40FFFFFF), drawStopIndicator = {})
+        Row(Modifier.fillMaxWidth().padding(top = 3.dp)) {
+            Label(if (track != null && track.durationMs > 0) TimeFormat.mmss(track.positionMs) else "", 10.sp, color = Color(0x99FFFFFF), modifier = Modifier.weight(1f))
+            Label(if (track != null && track.durationMs > 0) TimeFormat.mmss(track.durationMs) else "", 10.sp, color = Color(0x99FFFFFF))
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+            Control(R.drawable.ic_widget_prev, false, track != null) { controls?.skipToPrevious() }
+            Spacer(Modifier.width(18.dp))
+            Control(if (track?.playing == true) R.drawable.ic_widget_pause else R.drawable.ic_widget_play, true, track != null) {
+                if (track?.playing == true) controls?.pause() else controls?.play()
+            }
+            Spacer(Modifier.width(18.dp))
+            Control(R.drawable.ic_widget_next, false, track != null) { controls?.skipToNext() }
+        }
+    }
+}
+
+@Composable
+private fun Control(icon: Int, primary: Boolean, enabled: Boolean, onClick: () -> Unit) {
+    Box(
+        Modifier.size(if (primary) 44.dp else 40.dp).clip(CircleShape)
+            .background(if (primary) Color.White else Color(0x1FFFFFFF))
+            .clickable(enabled = enabled, onClick = onClick)
+            .alpha(if (enabled || primary) 1f else 0.4f),
+        contentAlignment = Alignment.Center,
+    ) { Image(painterResource(icon), null, Modifier.size(if (primary) 22.dp else 20.dp)) }
+}
+
+@Composable
+private fun SmallButton(text: String, onClick: () -> Unit) {
+    Box(
+        Modifier.clip(RoundedCornerShape(10.dp)).background(Accent).clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 8.dp),
+    ) { Label(text, 13.sp, FontWeight.Bold, Color.White) }
+}
+
+private fun openListenerSettings(context: android.content.Context) {
+    val component = MediaListener.component(context).flattenToString()
+    val detail = Intent(Settings.ACTION_NOTIFICATION_LISTENER_DETAIL_SETTINGS)
+        .putExtra(Settings.EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME, component)
+    try { context.startActivity(detail) }
+    catch (_: Exception) { context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)) }
 }
 
 @Composable
@@ -163,25 +429,10 @@ private fun Screen(onStart: () -> Unit, onStop: () -> Unit) {
     val canStart = selected.isNotEmpty() && devices.any { it.id == device }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize().background(Bg).statusBarsPadding().navigationBarsPadding(),
-        contentPadding = PaddingValues(20.dp),
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        item {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    Modifier.size(38.dp).clip(RoundedCornerShape(11.dp)).background(Color.White)
-                        .border(BorderStroke(2.dp, Ink), RoundedCornerShape(11.dp)),
-                    contentAlignment = Alignment.Center,
-                ) { Image(painterResource(R.drawable.ic_glyph), null, Modifier.size(30.dp)) }
-                Spacer(Modifier.width(12.dp))
-                Column {
-                    Label("SoundSplit", 20.sp, FontWeight.Bold)
-                    Label("Play chosen apps on another output", 13.sp, color = Muted)
-                }
-            }
-        }
-
         item {
             Panel {
                 Label(if (running) "Routing is on" else "Routing is off", 16.sp, FontWeight.Bold)

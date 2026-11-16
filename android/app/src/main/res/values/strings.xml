@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_description">What\'s playing in any app, with cover art and controls</string>
+    <string name="widget_name">Now playing</string>
+</resources>

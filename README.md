@@ -23,6 +23,7 @@ Per-app audio output. Route any app to its own speaker or headphones and leave e
 - Minimal mode: a small window with just apps and outputs (button in the title bar, or *Settings → Minimal mode*)
 - Tray icon, start with Windows
 - Themes: Light, Midnight, Aero, Classic 98
+- Updates itself: when a new release is out you get a popup; *Update now* downloads it and restarts
 
 Routing is handled by Windows itself (the same mechanism as *Settings → Sound → Volume mixer*), so no drivers or virtual cables are needed and no latency is added.
 
@@ -48,7 +49,13 @@ Android doesn't let one app move another app's audio to a different device (only
 - Expect a small delay (roughly 50–150 ms), fine for music, noticeable for video lip-sync.
 - Apps that block capture (some streaming/DRM apps) can't be routed. Calls and notifications are never touched.
 
-Install: download `SoundSplit-android.apk` from the release on your phone and allow installing from your browser when asked.
+Install: download `SoundSplit-android.apk` from the release on your phone and allow installing from your browser when asked. After that the app checks for new releases on launch and offers to update itself.
+
+### Now-playing widget
+
+The **Widget** tab adds a 3×3 home-screen widget showing what's playing in *any* app (YouTube Music in Brave, Spotify, YouTube Music, podcasts…): cover art, title, artist, progress, and previous / play-pause / next. Tapping the cover opens the app that's playing.
+
+It needs **notification access**, the only way Android shares other apps' media sessions. SoundSplit uses it just to read the song info, never notification contents. On Android 13+ a sideloaded app may show *"Restricted setting"*: open *App info → ⋮ → Allow restricted settings*, then allow access.
 
 ## How it's tested
 

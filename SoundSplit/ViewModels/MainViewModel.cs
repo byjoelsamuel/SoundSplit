@@ -44,6 +44,11 @@ namespace SoundSplit.ViewModels
         public ICommand SetThemeCommand { get; }
         public ICommand ShowSettingsCommand { get; }
         public ICommand ToggleMinimalCommand { get; }
+        public ICommand ShowUpdateCommand { get; }
+        public ICommand UpdateNowCommand { get; }
+
+        /// <summary>Raised when an update has been downloaded and the app should quit so it can be replaced.</summary>
+        public event EventHandler? ExitRequested;
 
         internal MainViewModel(AppSettings settings, bool demo = false)
         {
@@ -57,7 +62,11 @@ namespace SoundSplit.ViewModels
             ToggleEnabledCommand = new RelayCommand(() => IsEnabled = !IsEnabled);
             TestDeviceCommand = new RelayCommand(p => { if (p is string id) { _ = TestTone.PlayAsync(id); Toast("Playing test sound…"); } });
             OpenAddAppCommand = new RelayCommand(OpenAddApp);
-            CloseOverlaysCommand = new RelayCommand(() => { ShowAddApp = false; ShowTutorial = false; ShowResetConfirm = false; ShowSettings = false; });
+            CloseOverlaysCommand = new RelayCommand(() =>
+            {
+                ShowAddApp = false; ShowTutorial = false; ShowResetConfirm = false; ShowSettings = false;
+                if (!IsUpdating) ShowUpdate = false;
+            });
             AddPickedAppCommand = new RelayCommand(p => { if (p is PickerItem pi) AddApp(pi.Key, pi.DisplayName, pi.ExePath); });
             BrowseExeCommand = new RelayCommand(BrowseExe);
             RemoveAppCommand = new RelayCommand(p => { if (p is AppItem a) RemoveApp(a); });
@@ -68,6 +77,8 @@ namespace SoundSplit.ViewModels
             ShowTutorialCommand = new RelayCommand(() => { ShowSettings = false; ShowTutorial = true; });
             ShowSettingsCommand = new RelayCommand(() => ShowSettings = !ShowSettings);
             ToggleMinimalCommand = new RelayCommand(() => { ShowSettings = false; IsMinimal = !IsMinimal; });
+            ShowUpdateCommand = new RelayCommand(() => { ShowSettings = false; ShowUpdate = true; });
+            UpdateNowCommand = new RelayCommand(async () => await UpdateNowAsync());
             OpenWindowsSoundSettingsCommand = new RelayCommand(() =>
             {
                 try { Process.Start(new ProcessStartInfo("ms-settings:apps-volume") { UseShellExecute = true }); }
@@ -89,12 +100,61 @@ namespace SoundSplit.ViewModels
             _timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1500) };
             _timer.Tick += (_, _) => Refresh();
             _timer.Start();
+
+            _ = CheckForUpdateAsync(demo);
         }
 
         // ------------------------------------------------------------------ state
 
         public string Version { get; } =
             "v" + (System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0");
+
+        // ------------------------------------------------------------------ updates
+
+        private UpdateInfo? _update;
+        public bool UpdateAvailable => _update != null;
+        public string UpdateVersion => _update?.Version ?? "";
+        public string CurrentVersionText => Updates.CurrentVersion;
+
+        private bool _showUpdate; public bool ShowUpdate { get => _showUpdate; set => Set(ref _showUpdate, value); }
+        private bool _isUpdating; public bool IsUpdating { get => _isUpdating; private set => Set(ref _isUpdating, value); }
+        private double _updateProgress; public double UpdateProgress { get => _updateProgress; private set => Set(ref _updateProgress, value); }
+        private string _updateError = ""; public string UpdateError { get => _updateError; private set => Set(ref _updateError, value); }
+
+        private async System.Threading.Tasks.Task CheckForUpdateAsync(bool demo)
+        {
+            await System.Threading.Tasks.Task.Delay(TimeSpan.FromSeconds(2));
+            // Demo mode shows a pretend update so the popup can be previewed; it never downloads.
+            var info = demo ? new UpdateInfo("9.9.9", "", "") : await Updates.CheckAsync();
+            if (info == null) return;
+            _update = info;
+            Raise(nameof(UpdateAvailable));
+            Raise(nameof(UpdateVersion));
+            ShowUpdate = !ShowTutorial;   // don't stack on the first-run welcome; the title-bar button stays
+        }
+
+        private async System.Threading.Tasks.Task UpdateNowAsync()
+        {
+            if (_update == null || IsUpdating) return;
+            if (_demo) { UpdateError = "Demo mode: nothing is downloaded."; return; }
+            IsUpdating = true;
+            UpdateError = "";
+            try
+            {
+                var progress = new Progress<double>(p => UpdateProgress = p * 100);
+                if (await Updates.DownloadAndScheduleAsync(_update, progress))
+                {
+                    ExitRequested?.Invoke(this, EventArgs.Empty);
+                    return;
+                }
+                UpdateError = "Couldn't update automatically. Download it from GitHub instead.";
+            }
+            catch (Exception ex)
+            {
+                UpdateError = "Download failed: " + ex.Message;
+            }
+            IsUpdating = false;
+        }
 
         public bool IsSupported { get; }
         public string SupportMessage { get; }

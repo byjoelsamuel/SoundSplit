@@ -23,4 +23,5 @@
     <Geometry x:Key="I.Reset">M3 12 A9 9 0 1 0 6 5.3 L3 8 M3 3 V8 H8</Geometry>
     <Geometry x:Key="I.Shrink">M4 14 H10 V20 M20 10 H14 V4 M14 10 L21 3 M3 21 L10 14</Geometry>
     <Geometry x:Key="I.Expand">M15 3 H21 V9 M9 21 H3 V15 M21 3 L14 10 M3 21 L10 14</Geometry>
+    <Geometry x:Key="I.Download">M12 3 V15 M7 10 L12 15 L17 10 M5 21 H19</Geometry>
 </ResourceDictionary>
